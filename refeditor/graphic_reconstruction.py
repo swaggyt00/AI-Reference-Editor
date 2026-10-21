@@ -89,6 +89,48 @@ def extract_alpha_asset(frame,normalized_box,dest):
     if not cv2.imwrite(str(dest),rgba):raise OSError('PNG write failed')
     return {'pixel_width':cw,'pixel_height':ch,'foreground_coverage':round(ratio,4)}
 
+
+
+def extract_temporal_asset(frame,background_frame,normalized_box,dest):
+    """Recover a sprite over static textured footage from a clean adjacent plate.
+
+    Refuse if pixels outside the sprite candidate show camera or scene motion.
+    This conservative path works for some pixel graphics on fixed backgrounds.
+    """
+    if frame.shape != background_frame.shape or len(frame.shape)!=3:
+        return None
+    H,W=frame.shape[:2]
+    x,y,w,h=normalized_box
+    x0=max(0,round(x*W));y0=max(0,round(y*H))
+    x1=min(W,round((x+w)*W));y1=min(H,round((y+h)*H))
+    if x1-x0<24 or y1-y0<24:return None
+    diff=frame.astype(np.int16)-background_frame.astype(np.int16)
+    global_diff=np.abs(diff).mean(axis=2)
+    outside_mask=np.ones((H,W),dtype=bool)
+    outside_mask[y0:y1,x0:x1]=False
+    outside=global_diff[outside_mask]
+    if not len(outside) or np.median(outside)>8 or np.quantile(outside,.8)>20:
+        return None
+    delta=np.linalg.norm(diff[y0:y1,x0:x1].astype(np.float32),axis=2)
+    fg=(delta>32).astype(np.uint8)
+    ratio=float(fg.mean())
+    if not .018<=ratio<=.65:return None
+    n,labels,stats,_=cv2.connectedComponentsWithStats(fg,8)
+    areas=[int(stats[k,cv2.CC_STAT_AREA]) for k in range(1,n)]
+    if not areas or max(areas)<max(35,int(fg.size*.006)):return None
+    mask=np.zeros_like(fg)
+    for k in range(1,n):
+        if stats[k,cv2.CC_STAT_AREA]>=max(6,int(fg.size*.0002)):
+            mask[labels==k]=1
+    alpha=(np.clip((delta-18)/35,0,1)*mask*255).astype(np.uint8)
+    if not alpha.any():return None
+    rgba=cv2.cvtColor(frame[y0:y1,x0:x1],cv2.COLOR_BGR2BGRA)
+    rgba[:,:,3]=alpha
+    dest=Path(dest);dest.parent.mkdir(parents=True,exist_ok=True)
+    if not cv2.imwrite(str(dest),rgba):raise OSError('Cannot write temporal graphic PNG')
+    return {'pixel_width':x1-x0,'pixel_height':y1-y0,
+            'foreground_coverage':round(ratio,4),'extraction':'temporal_static_plate'}
+
 def extract_reference_graphics(reference_path,raw_candidates,output_dir,*,duration,
                                allowed_sample_times=None):
     if not isinstance(raw_candidates,list):raw_candidates=[]
@@ -113,7 +155,21 @@ def extract_reference_graphics(reference_path,raw_candidates,output_dir,*,durati
             dest=Path(output_dir)/(name+'.png')
             info=extract_alpha_asset(frame,item['box'],dest)
             if not info:
-                rejections.append({'candidate':i,'reason':'not isolated on flat background'})
+                # Some reference overlays sit on a complex but STILL
+                # background: use video frames before/after the graphic as
+                # a clean plate, never accept a moving photographic plate.
+                positions=[item['start']-.15,item['end']+.15]
+                for clean_at in positions:
+                    if not(0<=clean_at<duration):
+                        continue
+                    cap.set(cv2.CAP_PROP_POS_FRAMES,round(clean_at*fps))
+                    clean_ok,clean_frame=cap.read()
+                    if not clean_ok:
+                        continue
+                    info=extract_temporal_asset(frame,clean_frame,item['box'],dest)
+                    if info:break
+            if not info:
+                rejections.append({'candidate':i,'reason':'no flat or stable clean background'})
                 continue
             x,y,w,h=item['box']
             layer={'kind':'image','asset':name,'start':round(item['start'],3),
