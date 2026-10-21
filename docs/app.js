@@ -164,6 +164,8 @@ async function showResult(run) {
   $('artifact-links').hidden = false;
   $('project-link').href = apiUrl(run.project_url); $('project-link').download = `project-v${run.version}.json`;
   $('qa-link').href = apiUrl(run.qa_url); $('comparison-link').href = apiUrl(run.comparison_url);
+  $('motion-qa-link').hidden = !run.settings?.motion_design;
+  if (run.settings?.motion_design) $('motion-qa-link').href = apiUrl(run.motion_qa_url);
   $('result-meta').textContent = `Версия ${run.version}`;
   renderVersions();
   try {
