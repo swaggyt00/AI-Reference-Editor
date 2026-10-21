@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, OffthreadVideo, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Sequence, OffthreadVideo, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 
 const limits={extrapolateLeft:'clamp',extrapolateRight:'clamp'};
 const smooth=t=>1-Math.pow(1-t,3);
@@ -51,10 +51,11 @@ const VideoGraphic=({item})=>{
   return <div style={{...placement(item),...anim,width:(item.width??.8)*100+'%',
     height:(item.height??.32)*100+'%',borderRadius:18,overflow:'hidden',
     border:'3px solid #ffffffaa',boxShadow:'0 18px 35px #0009'}}>
-    <OffthreadVideo src={staticFile('assets/'+item.asset)} volume={0}
-      startFrom={Math.round((item.source_start??0)*fps)}
-      endAt={Math.round((item.source_start??0)*fps)+duration}
-      style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+    <Sequence from={begin} durationInFrames={duration} layout="none">
+      <OffthreadVideo src={staticFile('assets/'+item.asset)} volume={0}
+        startFrom={Math.round((item.source_start??0)*fps)}
+        style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+    </Sequence>
   </div>;
 };
 const RouteGraphic=({item})=>{
