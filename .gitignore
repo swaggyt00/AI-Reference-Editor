@@ -27,3 +27,6 @@ output/*
 *.flac
 *.aac
 *.m4a
+
+# Machine-local downloaded binaries (never commit)
+tools/
