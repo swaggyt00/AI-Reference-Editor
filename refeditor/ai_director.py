@@ -58,7 +58,8 @@ def _get_or_analyze(file, cache, role, model, on_retry=None):
             data = json.loads(cache.read_text(encoding="utf-8"))
             # A completed video summary remains usable after the user manually
             # selects another model. Keep the completed work, not rerun uploads.
-            if data["role"] == role and isinstance(data.get("analysis"), dict):
+            if (data["role"] == role and isinstance(data.get("analysis"), dict)
+                    and data.get("video_name") == Path(file).name):
                 return data
         except (ValueError, KeyError, OSError):
             pass
