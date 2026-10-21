@@ -13,7 +13,7 @@ The original four-video example was a disposable validation case, not training d
 5. Check the rendered final.mp4, visual comparison, boundaries, durations and audio; technical QA alone does not establish senior creative quality.
 6. Never call a result “1:1” if the user supplies different footage and the movements do not match.
 7. Keep Python+FFmpeg cross-platform; do not require CapCut.
-8. Repository contains only reusable source code; no customer/reference footage belongs in git. Accept arbitrary media paths per new job. Do not claim upload feature already exists. See WEB_CODEX.md.
+8. Repository contains only reusable source code; no customer/reference footage belongs in git. Accept arbitrary media paths or fresh browser uploads per new job. Local browser upload/render now exists; do not imply public multi-user hosting or unrestricted natural-language execution. See WEB_CODEX.md.
 
 ## Setup / commands
 
@@ -23,18 +23,21 @@ The original four-video example was a disposable validation case, not training d
 - python -m refeditor analyze --reference input/reference.mp4 --output output/analysis.json — extract signals.
 - python -m refeditor pipeline --reference input/reference.mp4 --sources input/clip1.mp4 input/clip2.mp4 --output-dir output --mode fit — render with actual files.
 - python -m refeditor render --project output/project.json --output output/revised.mp4 — rerender.
+- python -m refeditor web — local browser upload/render UI at http://127.0.0.1:8000.
+- python -m pip install -r requirements-dev.txt — API/browser test dependencies.
+- python scripts/test_web_browser.py — browser acceptance test against a running local server (requires Chromium).
 
 ## Feature status
 
-Implemented: cuts; black vertical masking; limited bright-flash candidates; chronological source mapping; optional FFT alignment if audio matches; JSON effect recipes; rendering; technical QA/contact sheet.
+Implemented: cuts; black vertical masking; limited bright-flash candidates; chronological source mapping; optional FFT alignment if audio matches; JSON effect recipes; rendering; technical QA/contact sheet; local web upload, disk-backed projects, progress, MP4 delivery and versioned rerender; reproducible synthetic API/browser tests. Text brief executes only documented exact directive lines; other prose is stored with an explicit warning.
 
-Not implemented: semantic shot retrieval; automatic zoom/blur/shake/speed-ramp detection; object-level VFX/tracking; generative missing scenes; senior-level creative judgment; web UI/upload.
+Not implemented: semantic shot retrieval; automatic zoom/blur/shake/speed-ramp detection; object-level VFX/tracking; generative missing scenes; senior-level creative judgment; free-form natural-language edit execution; authenticated multi-user hosting.
 
 ## Roadmap
 
-1. Add reproducible synthetic integration media/test independent from user's files.
+1. Extend reproducible synthetic integration coverage and evaluate on new real paired videos independently of old examples.
 2. Add semantics-driven shot retrieval, robust timeline detection, real effect classification and parameter estimation (with confidence and abstention).
 3. Add automated visual/audio critique and revision loop, evaluated on real paired examples.
-4. Add secure upload storage + web UI + rendered file delivery to make it a practical browser-based editor.
+4. Extend the local browser workflow with authenticated hosting, storage lifecycle controls and durable multi-process workers when deployment requires them.
 
 Always run tests and a real render when video input is available. Fix regressions without removing working features. Never describe a test-specific implementation as a general-purpose capability without testing on unrelated inputs.

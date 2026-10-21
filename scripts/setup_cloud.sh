@@ -9,6 +9,6 @@ if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
     echo 'ffmpeg/ffprobe not found and no apt-get available. Install them in the Codex environment.' >&2; exit 1
   fi
 fi
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
 python -m refeditor doctor
 python -m unittest discover -s tests -v

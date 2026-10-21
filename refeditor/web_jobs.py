@@ -1,0 +1,202 @@
+"""Durable local projects and a single background render worker.
+
+Use one server process per storage directory. Media never enters source control.
+"""
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
+import json
+import logging
+from pathlib import Path
+import re
+from threading import RLock
+from uuid import uuid4
+
+from .analyzer import analyze_video
+from .project import build_project, write_project
+from .qa import contact_sheet, qa_report
+from .renderer import stream_render
+
+LOG = logging.getLogger(__name__)
+ACTIVE = {'queued', 'running'}
+FILES = {'final.mp4', 'project.json', 'qa_report.json', 'comparison.jpg'}
+BRIEF_WARNING = ('Свободный текст сохранён как задание для редактора, но автоматически не исполнен. '
+                 'Применяются только отдельные строки «звук: нет/референс/исходник», '
+                 '«режим: fit/native», «длительность: число секунд».')
+
+
+def resolve_settings(settings):
+    """Deliberately small explicit grammar, never pretend to understand free prose."""
+    result = dict(settings)
+    warnings = []
+    for line in result['brief'].splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        key, sep, value = line.partition(':')
+        key, value = key.strip().lower(), value.strip().lower()
+        if sep and key in ('звук', 'режим', 'длительность'):
+            if key == 'звук':
+                options = {'нет': 'none', 'референс': 'reference', 'исходник': 'source'}
+                if value not in options:
+                    raise ValueError('Звук: укажите нет, референс или исходник.')
+                result['audio'] = options[value]
+            elif key == 'режим':
+                if value not in ('fit', 'native'):
+                    raise ValueError('Режим: укажите fit или native.')
+                result['mode'] = value
+            else:
+                if not re.fullmatch(r'\d+(?:[.,]\d+)?(?:\s*(?:с|сек|секунд|s))?', value):
+                    raise ValueError('Длительность: укажите положительное число секунд.')
+                duration = float(re.match(r'\d+(?:[.,]\d+)?', value)[0].replace(',', '.'))
+                if not .1 <= duration <= 3600:
+                    raise ValueError('Длительность должна быть от 0,1 до 3600 секунд.')
+                result['max_seconds'] = duration
+        elif BRIEF_WARNING not in warnings:
+            warnings.append(BRIEF_WARNING)
+    return result, warnings
+
+
+class ProjectStore:
+    def __init__(self, root):
+        self.root = Path(root).resolve()
+        self.root.mkdir(parents=True, exist_ok=True)
+        self.lock = RLock()
+        self.projects = {}
+        self.uploading = set()
+        self.executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix='refeditor')
+        for path in self.root.glob('*/state.json'):
+            try:
+                state = json.loads(path.read_text(encoding='utf-8'))
+                if state['id'] != path.parent.name or not re.fullmatch(r'[a-f0-9]{32}', state['id']):
+                    continue
+                self.projects[state['id']] = state
+                changed = False
+                for run in state['renders']:
+                    if run['status'] in ACTIVE:
+                        run.update(status='failed', stage='Обработка прервана',
+                                   error='Сервер перезапущен. Запустите повторный рендер.')
+                        changed = True
+                if changed:
+                    self.save(state)
+                for part in path.parent.glob('media/*.part'):
+                    part.unlink(missing_ok=True)
+            except (ValueError, KeyError, OSError):
+                LOG.exception('Cannot recover project %s', path.parent.name)
+
+    def close(self):
+        self.executor.shutdown(wait=True)
+
+    def directory(self, pid):
+        if not re.fullmatch(r'[a-f0-9]{32}', pid) or pid not in self.projects:
+            raise KeyError(pid)
+        return self.root / pid
+
+    def save(self, state):
+        directory = self.root / state['id']
+        directory.mkdir(parents=True, exist_ok=True)
+        temp = directory / 'state.tmp'
+        temp.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding='utf-8')
+        temp.replace(directory / 'state.json')
+
+    def create(self):
+        with self.lock:
+            state = {'id': uuid4().hex, 'reference': None, 'sources': [], 'renders': []}
+            self.projects[state['id']] = state
+            self.save(state)
+            return deepcopy(state)
+
+    def get(self, pid):
+        with self.lock:
+            self.directory(pid)
+            return deepcopy(self.projects[pid])
+
+    def media_path(self, pid, asset):
+        return self.directory(pid) / 'media' / (asset['id'] + '.media')
+
+    def busy(self, pid):
+        return any(r['status'] in ACTIVE for r in self.projects[pid]['renders'])
+
+    def start(self, pid, settings):
+        with self.lock:
+            self.directory(pid)
+            state = self.projects[pid]
+            if self.busy(pid) or pid in self.uploading:
+                raise ValueError('Дождитесь завершения текущей загрузки или рендера.')
+            if not state['reference'] or not state['sources']:
+                raise ValueError('Загрузите референс и хотя бы один исходник.')
+            settings, warnings = resolve_settings(settings)
+            ids = settings.get('source_ids')
+            assets = {s['id']: s for s in state['sources']}
+            if ids is None:
+                ids = list(assets)
+            if not ids or len(ids) != len(set(ids)) or any(i not in assets for i in ids):
+                raise ValueError('Выберите загруженные исходники без повторений.')
+            settings['source_ids'] = ids
+            rid = uuid4().hex
+            prefix = f'/api/projects/{pid}/renders/{rid}/files/'
+            run = {'id': rid, 'version': len(state['renders']) + 1, 'status': 'queued',
+                   'stage': 'В очереди', 'progress': 0, 'settings': settings,
+                   'warnings': warnings, 'error': None,
+                   'video_url': prefix + 'final.mp4', 'download_url': prefix + 'final.mp4?download=1',
+                   'project_url': prefix + 'project.json', 'qa_url': prefix + 'qa_report.json',
+                   'comparison_url': prefix + 'comparison.jpg'}
+            state['renders'].append(run)
+            self.save(state)
+            self.executor.submit(self.process, pid, rid, deepcopy(state['reference']),
+                                 [deepcopy(assets[i]) for i in ids], deepcopy(settings))
+            return deepcopy(run)
+
+    def update(self, pid, rid, **values):
+        with self.lock:
+            state = self.projects[pid]
+            run = next(r for r in state['renders'] if r['id'] == rid)
+            if all(run.get(k) == v for k, v in values.items()):
+                return
+            run.update(values)
+            self.save(state)
+
+    def process(self, pid, rid, reference, sources, settings):
+        directory = self.directory(pid)
+        out = directory / 'renders' / rid
+        out.mkdir(parents=True, exist_ok=True)
+        try:
+            self.update(pid, rid, status='running', stage='Анализ референса', progress=1)
+            cache = directory / ('analysis-' + reference['id'] + '.json')
+            try:
+                analysis = json.loads(cache.read_text(encoding='utf-8'))
+            except (FileNotFoundError, json.JSONDecodeError):
+                analysis = analyze_video(self.media_path(pid, reference),
+                    progress=lambda done, total: self.update(pid, rid, progress=1 + int(29 * done / total)))
+                cache_temp = cache.with_suffix('.tmp')
+                write_project(analysis, cache_temp)
+                cache_temp.replace(cache)
+            self.update(pid, rid, stage='Сборка монтажного плана', progress=32)
+            project = build_project(analysis, [self.media_path(pid, s) for s in sources],
+                                    mode=settings['mode'], audio=settings['audio'],
+                                    align_audio=settings['align_audio'])
+            project['brief'] = settings['brief']
+            project['web_settings'] = settings
+            # Duration is an explicit end trim, not a fabricated new pacing model.
+            if settings['max_seconds'] is not None:
+                frame_count = max(1, min(len(analysis['edge_masks']), round(settings['max_seconds'] * project['fps'])))
+                project['duration'] = frame_count / project['fps']
+            used = {s['source_index'] for s in project['segments'] if s['start_frame'] < round(project['duration'] * project['fps'])}
+            if len(used) < len(sources):
+                project['warnings'].append(f'В этом монтаже использовано {len(used)} из {len(sources)} исходников. '
+                    'Число сцен определяется референсом; распределение последовательное. При одной сцене движок выбирает последний исходник.')
+            with self.lock:
+                run = next(r for r in self.projects[pid]['renders'] if r['id'] == rid)
+                project['warnings'] += list(run['warnings'])
+            write_project(project, out / 'project.json')
+            self.update(pid, rid, stage='Рендер видео', progress=38, warnings=project['warnings'])
+            mp4 = stream_render(project, out / 'final.mp4',
+                progress=lambda done, total: self.update(pid, rid, progress=38 + int(50 * done / total)))
+            self.update(pid, rid, stage='Проверка видео и аудио', progress=91)
+            qa = qa_report(project, mp4, out / 'qa_report.json')
+            self.update(pid, rid, stage='Создание сравнения', progress=96)
+            contact_sheet(project['reference'], mp4, out / 'comparison.jpg')
+            self.update(pid, rid, status='completed', stage='Готово', progress=100, warnings=qa['warnings'])
+        except Exception:
+            LOG.exception('Render failed: %s/%s', pid, rid)
+            self.update(pid, rid, status='failed', stage='Не удалось завершить рендер',
+                        error='Ошибка чтения или обработки видео. Проверьте файлы и повторите рендер. Подробности в журнале сервера.')

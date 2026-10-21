@@ -1,36 +1,94 @@
-# Codex Web — запуск AI Reference Editor
+# AI Reference Editor — веб-интерфейс и Codex Cloud
 
-## 1. Connect the repository
+## Быстрый локальный запуск
 
-1. Open https://chatgpt.com/codex using an account with Codex Cloud access.
-2. Connect GitHub (if needed) and authorize swaggyt00/AI-Reference-Editor for Codex.
-3. Create a cloud Environment with repository swaggyt00/AI-Reference-Editor, branch main.
-4. In the Environment setup settings, enter the setup script command:
-    bash scripts/setup_cloud.sh
-5. Save/publish the Environment and choose it in a new Codex cloud task.
+Нужны Python 3.11+, FFmpeg и ffprobe. Выполните в каталоге репозитория:
 
-Setup requires package installation permissions (Python dependencies and FFmpeg); inspect any setup errors and allow necessary access during setup.
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m refeditor doctor
+python -m refeditor web
+```
 
-## 2. First run WITHOUT videos
+В Windows активация: `.venv\Scripts\activate` (PowerShell: `.venv\Scripts\Activate.ps1`).
 
-Send the following task to Codex:
+Откройте **http://127.0.0.1:8000**. Сборка JavaScript и CapCut не нужны.
 
-Read AGENTS.md, README.md and WEB_CODEX.md. Run python -m unittest discover -s tests -v and python -m refeditor doctor. Report dependency errors, if any. Do not claim video editing has already run or automatically detect complex VFX that the current code cannot analyze.
+1. Выберите или перетащите один референс.
+2. Добавьте несколько исходников. Стрелками измените порядок; крестик исключает файл из нового монтажа, сохраняя его для предыдущих версий.
+3. Введите задание и выберите скорость, звук и при необходимости длительность.
+4. Нажмите **«Анализировать и смонтировать»**. Интерфейс показывает загрузку, анализ, рендер и проверку.
+5. Посмотрите результат, скачайте MP4, откройте отчёт QA и сравнение кадров.
+6. Измените параметры, порядок/набор исходников или текст и нажмите **«Повторить рендер»**. Появится новая версия, старые доступны для просмотра и скачивания.
 
-## 3. Run on actual videos
+Другой референс — новый проект. Файлы произвольные: никакие старые четыре тестовых видео не требуются. Основные контейнеры MP4/MOV/MKV/AVI/WebM и другие поддерживаются при наличии декодеров в FFmpeg/OpenCV. Ошибки формата показываются в интерфейсе.
 
-This GitHub repository contains CODE ONLY, not private reference/source MP4s. Codex Cloud does NOT automatically see videos on the user's PC or in an ordinary ChatGPT conversation.
+## Что означает текстовое задание
 
-Make input files available inside the Codex task workspace (for example through a securely hosted temporary direct download URL accessible from the environment, or a separate upload tool). Keep private videos out of this PUBLIC repository.
+Это пока **не произвольное AI-управление**. Текст сохраняется в `project.json`; автоматически выполняются только отдельные строки:
 
-Once files exist inside the workspace, e.g. input/reference.mp4 and input/clip1.mp4 and input/clip2.mp4:
+```text
+звук: нет
+режим: fit
+длительность: 15
+```
 
-    python -m refeditor pipeline --reference input/reference.mp4 --sources input/clip1.mp4 input/clip2.mp4 --output-dir output --mode fit
+Варианты звука: `нет`, `референс`, `исходник`; режима: `fit`, `native`. Длительность — положительное число секунд (от 0,1 до 3600), обрезка конца результата в пределах длины референса. Каждая команда содержит одно значение и имеет приоритет над формой. Остальной текст сопровождается предупреждением о том, что он сохранён, но не исполнен автоматически.
 
-Expected outputs: output/final.mp4, output/project.json, output/comparison.jpg, output/qa_report.json. Ask Codex to inspect the result and expose available output artifacts through the task UI.
+Автоматический анализ ограничен жёсткими склейками, чёрными боковыми масками и кандидатами кратких вспышек. Рендер переносит склейки и маски; кандидаты вспышек автоматически не превращаются в эффекты. Zoom, blur, shake, color и speed ramps доступны как ручные JSON-рецепты через CLI, **не распознаются автоматически**. Распределение исходников последовательное, не смысловое. При одной сцене движок выбирает последний исходник; неиспользованные исходники отмечаются предупреждением.
 
-WARNING: There is NOT YET an upload-and-render web page. Codex Web is currently a cloud software development environment that runs Python scripts, not an end-user video editor. A separate upload UI/storage/delivery workflow is future work.
+`fit` меняет скорость под сцены, `native` сохраняет её и при нехватке материала удерживает последний кадр. Звук по умолчанию выключен. Звук референса используйте только при наличии разрешения; звук исходника — дорожка первого выбранного файла с начала, без автоматического сведения сцен. FFT-выравнивание работает только при реально совпадающем звуке.
 
-## 4. Next development priorities
+## Хранение, восстановление, ограничения
 
-Build a user-friendly secure upload/output flow for large videos. Add reference-aware zoom, motion blur, speed ramp, transition analysis and semantic shot matching, with measurable confidence and a comparison loop. Do not invent detected effects.
+```bash
+python -m refeditor web --port 8000 --storage output/web --max-upload-mb 2048
+```
+
+В `output/web/<project-id>/` сохраняются исходные загрузки, `state.json`, анализ и отдельные каталоги `renders/<render-id>/` с `final.mp4`, `project.json`, `qa_report.json`, `comparison.jpg`. Старые MP4 не перезаписываются. Ручное редактирование скачанного `project.json` применяется командой `python -m refeditor render`, а не повторным запуском формы.
+
+Ссылка страницы с `#project-id` и локальное состояние браузера восстанавливают проект после обновления. Готовые загрузки доступны после перезапуска сервера; незавершённую загрузку после обновления страницы нужно выбрать заново. При потере ответа сервера повторная попытка загрузки не дублирует уже сохранённый файл. Прерванные перезапуском задачи отмечаются как ошибки, затем доступны для повторного рендера.
+
+Лимиты по умолчанию: 2 ГиБ на файл, 10 ГиБ загруженных материалов на проект, 32 исходника плюс один референс; каждый ролик до 60 минут, 4096×2160 пикселей и 120 fps. Неиспользованные в текущем монтаже загрузки тоже входят в лимит; их можно вернуть кнопкой **«Вернуть загруженные исходники»**. Версии результатов занимают дополнительное место. Автоматической очистки нет: остановите сервер и архивируйте/удалите ненужные каталоги проектов вручную. В git медиа не попадают.
+
+Это **локальное однопользовательское приложение**, один процесс сервера с одним фоновым render-worker на каталог хранения. Учётные записи, публичная авторизация и распределённая очередь пока отсутствуют. По умолчанию сервер слушает только `127.0.0.1`. Для удалённого размещения необходимы аутентифицирующий HTTPS-прокси, ограничения диска, размера запросов и таймаутов; не открывайте `--host 0.0.0.0` напрямую в Интернет.
+
+## Тесты
+
+Сначала установите зависимости проверки, затем запустите полный набор:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s tests -v
+python -m refeditor doctor
+```
+
+Тесты сами создают короткие синтетические видео, выполняют настоящий рендер FFmpeg, проверяют MP4, звук, длительность, смену кадров, маски, загрузки, версионность и восстановление после ошибок. Пользовательские файлы не нужны. Техническая проверка не является оценкой художественного качества.
+
+Проверка браузера (веб-сервер должен работать в другом терминале):
+
+```bash
+python -m playwright install chromium
+python scripts/test_web_browser.py --url http://127.0.0.1:8000
+```
+
+Можно использовать системный Chromium: `--browser /путь/к/chromium`. Скрипт создаёт тестовые проекты и сохраняет скриншоты в `output/browser-check/`; для изолированной проверки запускайте сервер с `--storage output/test-web`.
+
+## Codex Cloud
+
+1. Подключите репозиторий `swaggyt00/AI-Reference-Editor` к окружению Codex.
+2. В setup script укажите `bash scripts/setup_cloud.sh`. Скрипт устанавливает FFmpeg при необходимости, Python-зависимости и запускает тесты.
+3. В задаче изучите `AGENTS.md`, `README.md`, этот файл и запустите тесты до изменений.
+4. Для работы с интерфейсом нужен доступ из вашего браузера к порту приложения. Если среда предоставляет защищённый port forwarding/preview, используйте его. Сам по себе запуск на `127.0.0.1` внутри удалённой среды не открывает страницу на вашем компьютере.
+5. При отсутствии проброса порта запустите приложение локально по инструкции выше. Не следует считать обычное окно Codex Web веб-редактором или обещать публичный URL без настроенного доступа.
+
+CLI остаётся доступным для файлов в рабочей среде:
+
+```bash
+python -m refeditor pipeline --reference input/reference.mp4 --sources input/clip1.mp4 input/clip2.mp4 --output-dir output/job --mode fit
+python -m refeditor render --project output/job/project.json --output output/job/revised.mp4
+```
+
+Видео на вашем компьютере или в другом чате автоматически не появляются в Codex. Загрузите их через доступный веб-интерфейс или предоставьте файлы в рабочей среде отдельно. Не добавляйте личные материалы в публичный репозиторий.

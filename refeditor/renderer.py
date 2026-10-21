@@ -51,7 +51,7 @@ def effect_mask(frame,bounds):
     return frame
 
 
-def stream_render(project,output,crf=19,preset='fast',max_seconds=None):
+def stream_render(project,output,crf=19,preset='fast',max_seconds=None,*,progress=None):
     output=Path(output).expanduser().resolve()
     output.parent.mkdir(parents=True,exist_ok=True)
     fps=float(project['fps']);width=int(project['width']);height=int(project['height'])
@@ -65,7 +65,7 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None):
     commands=['ffmpeg','-y','-hide_banner','-loglevel','error',
              '-f','rawvideo','-pix_fmt','bgr24','-s',f'{width}x{height}',
              '-r',str(fps),'-i','pipe:0','-an','-c:v','libx264',
-             '-preset',preset,'-crf',str(crf),'-pix_fmt','yuv420p',
+             '-preset',preset,'-crf',str(crf),'-vf','pad=ceil(iw/2)*2:ceil(ih/2)*2','-pix_fmt','yuv420p',
              '-movflags','+faststart',str(raw)]
     pipe=None
     try:
@@ -93,6 +93,8 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None):
                 try:pipe.stdin.write(frame.tobytes())
                 except BrokenPipeError:
                     break
+                if progress and (i == 0 or (i+1) % max(1, round(fps)) == 0 or i+1 == frames):
+                    progress(i+1, frames)
             pipe.stdin.close()
             code=pipe.wait()
         if code:
@@ -113,6 +115,8 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None):
             raw.replace(output)
     finally:
         for reader in readers:reader.close()
-        if pipe is not None and pipe.poll() is None:pipe.kill()
+        if pipe is not None and pipe.poll() is None:
+            pipe.kill()
+            pipe.wait()
         if raw.exists() and raw != output:raw.unlink()
     return str(output)

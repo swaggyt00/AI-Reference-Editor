@@ -41,7 +41,7 @@ def black_edge_bounds(frame, work_width=320, max_pixel=14, min_black_fraction=.9
     return [round(left/work_width,6),round((right+1)/work_width,6)]
 
 
-def analyze_video(path, out=None):
+def analyze_video(path, out=None, *, progress=None):
     path=Path(path).expanduser().resolve()
     meta=video_metadata(path)
     cap=cv2.VideoCapture(str(path))
@@ -62,8 +62,11 @@ def analyze_video(path, out=None):
             diffs.append(float(np.mean(np.abs(small.astype(np.int16)-prev_img.astype(np.int16)))))
             hist_diffs.append(float(cv2.compareHist(hist,prev_hist,cv2.HISTCMP_BHATTACHARYYA)))
         prev_img=small;prev_hist=hist;frame_idx+=1
+        if progress and (frame_idx == 1 or frame_idx % max(1, round(meta['fps'])) == 0):
+            progress(min(frame_idx, meta['frames']), meta['frames'])
     cap.release()
     if not frame_idx:raise ValueError('No decodable frames')
+    if progress:progress(frame_idx, frame_idx)
     meta['frames']=frame_idx;meta['duration']=frame_idx/meta['fps']
     d=np.asarray(diffs,dtype='float64');h=np.asarray(hist_diffs,dtype='float64')
     # Two independent signals avoid classifying large moving objects as scene cuts.

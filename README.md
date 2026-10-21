@@ -14,11 +14,58 @@ Python 3.11+, FFmpeg and ffprobe, Python dependencies in requirements.txt.
 
     python -m pip install -r requirements.txt
     python -m refeditor doctor
+    python -m pip install -r requirements-dev.txt
     python -m unittest discover -s tests -v
 
 For Codex Cloud / Linux you can run:
 
     bash scripts/setup_cloud.sh
+
+## Browser editor
+
+Start the local web interface (no Node.js or frontend build required):
+
+    python -m refeditor web
+
+Open **http://127.0.0.1:8000**. Select or drop one reference and multiple source videos, arrange the source order, enter a brief and choose speed/audio settings. Click **«Анализировать и смонтировать»**. Upload progress and background analysis/render stages are displayed; completed MP4s support preview, seeking and download. Change the settings, source selection/order or brief and click **«Повторить рендер»** to create a new version using the same uploads. Previous versions remain available.
+
+The page restores the last project after refresh; its URL fragment contains the project ID and can be bookmarked. Completed uploads, render metadata and results persist under `output/web/<project-id>/`. Unfinished uploads must be selected again after refresh. Interrupted renders are marked failed on server restart and can be retried. To use a different reference, start a new project. Removing a source from the edit retains it for earlier versions; use **«Вернуть загруженные исходники»** to select it again.
+
+### Text brief: explicit commands, not general AI interpretation
+
+The brief is saved in each version's `project.json`. Only these exact command lines are currently executed; one value per line:
+
+    звук: нет
+    режим: native
+    длительность: 15
+
+`звук` accepts `нет`, `референс`, or `исходник`; `режим` accepts `fit` or `native`; `длительность` accepts seconds (decimal comma or point). Commands override the corresponding form settings. Duration is an end trim, capped by reference duration; it does not regenerate pacing or extend the reference. Other text is preserved and visibly reported as **not automatically executed**. There is no LLM service or API key dependency.
+
+Audio defaults to none. Select reference audio only when permitted. Source audio uses the first selected source from its beginning, not a per-shot sound mix. Optional audio alignment is only for recordings that actually share sound. The existing chronological mapper can use fewer sources than supplied; with a single reference shot it selects the last source. The interface reports unused sources.
+
+### Storage and launch options
+
+    python -m refeditor web --port 8000 --storage output/web --max-upload-mb 2048
+
+- Default limits: 2 GiB per uploaded file, 10 GiB of uploaded media per project, 32 stored sources plus one reference; each video up to 60 minutes, 4096×2160 pixels and 120 fps. Render versions require additional disk space. Source formats must be decodable by the installed FFmpeg **and** OpenCV; invalid files and playlists are rejected. No fixed filenames or example footage are required.
+- Uploads stream to disk with generated names, actual media validation and byte limits; completed upload retries are idempotent. File delivery is restricted to completed render artifacts. Mutating API requests require a custom header and same-origin checks.
+- **Local, single-user service:** one server process and one render worker per storage directory. Default binding is loopback. There are no user accounts, public hosting authentication, automatic retention cleanup or distributed job queue. Do not expose it directly to the Internet; remote deployment needs an authenticated TLS proxy, upload limits/timeouts and disk quotas. `--host` is available for a trusted, protected environment.
+- Stop the server before manually archiving or deleting old project directories. Starting a new project does not delete the previous one. Original uploads and render artifacts are ignored by git.
+- H.264 output with odd source dimensions is padded by at most one pixel on the right/bottom for browser compatibility. Reference/source selection, manual effect recipes and all previous CLI commands remain supported. The web form rebuilds the timeline from its settings; manual JSON recipes are edited and rerendered via the CLI.
+
+### Verification
+
+    python -m pip install -r requirements-dev.txt
+    python -m unittest discover -s tests -v
+
+The suite generates fresh synthetic media and tests real FFmpeg renders, cuts/masks, audio, upload validation, download ranges, revision preservation, failure recovery and interrupted-state recovery. It does not need old user videos.
+
+For a browser acceptance test, run the server in one terminal, then in another:
+
+    python -m playwright install chromium
+    python scripts/test_web_browser.py --url http://127.0.0.1:8000
+
+An installed Chromium can be selected with `--browser /path/to/chromium`. The test covers uploads, ordering, playback/download, reload, rerender/history, source reselection, lost upload response recovery and mobile width; generated media/screenshots are saved under `output/browser-check/`. It creates disposable projects on the supplied server, so use a test storage directory when needed.
 
 ## Editing your videos
 
@@ -55,6 +102,6 @@ Personal media is intentionally excluded from git via .gitignore. The project do
 
 ## Limitations / roadmap
 
-Not yet implemented: semantic shot matching; automatic zoom, speed ramp, motion blur or object-based effect detection; full sound design; generative shot completion; browser upload page; persistent media storage and human-level creative quality evaluation.
+Not yet implemented: semantic shot matching; automatic zoom, speed ramp, motion blur or object-based effect detection; full sound design; generative shot completion; general natural-language edit execution; multi-user hosting and human-level creative quality evaluation. The local browser upload/render page and disk-backed project/version storage are implemented.
 
 AGENTS.md contains instructions for further Codex development. WEB_CODEX.md contains practical cloud steps.
