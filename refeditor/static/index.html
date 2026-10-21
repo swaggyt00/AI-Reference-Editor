@@ -22,33 +22,50 @@
           <fieldset id="editor-fields">
             <section class="card">
               <div class="section-title"><span class="step">01</span><h2>Материалы</h2><span class="small-label">НАЧНИТЕ ЗДЕСЬ</span></div>
+              <label class="field-label" for="editor-mode">Режим монтажа</label>
+              <select id="editor-mode" style="width:100%;padding:12px;border-radius:8px;margin-bottom:12px;">
+                <option value="reference">Reference Clone — повторить референс</option>
+                <option value="smart_reels">Smart Reels — лучшие моменты из длинного ролика</option>
+              </select>
+              <div id="reference-section">
               <label class="field-label" for="reference">Референс <span>Одно готовое видео</span></label>
               <label class="dropzone reference-drop" id="reference-drop" for="reference">
                 <span class="upload-icon" aria-hidden="true">↥</span><strong>Выберите референс</strong><span>или перетащите видео сюда</span>
                 <input id="reference" type="file" accept="video/*,.mkv,.mov,.mxf,.avi,.webm,.mts,.m2ts">
               </label>
-              <div id="reference-info" class="reference-info" hidden></div>
+              <div id="reference-info" class="reference-info" hidden></div></div>
               <div class="field-heading"><label class="field-label" for="sources">Исходные видео</label><span id="source-count">0 / 32</span></div>
               <label class="dropzone source-drop" id="source-drop" for="sources"><span aria-hidden="true">＋</span><strong>Добавить исходники</strong><span>Можно несколько файлов</span><input id="sources" type="file" multiple accept="video/*,.mkv,.mov,.mxf,.avi,.webm,.mts,.m2ts"></label>
               <ol id="source-list" class="source-list"></ol>
               <p class="hint" id="library-status" hidden></p>
               <button type="button" class="button restore-button" id="restore-sources" hidden>Вернуть загруженные исходники</button>
-              <p class="hint">Порядок исходников влияет на монтаж: движок распределяет их по сценам последовательно.</p>
+              <p class="hint" id="source-order-hint">Сцены сопоставляются по общему звуку, а при включённом Gemini — дополнительно по смыслу. Всегда проверяйте результат.</p>
+              <div id="reels-fields" hidden>
+                <label class="field-label" for="reel-seconds">Длина итогового Reels, секунд</label>
+                <input id="reel-seconds" type="number" min="10" max="90" step="1" value="60" style="padding:9px;margin-bottom:10px;">
+                <label class="field-label" for="music">Ваша музыка (необязательно)</label>
+                <label class="dropzone" id="music-drop" for="music">
+                  <span aria-hidden="true">♫</span><strong>Добавить музыку</strong>
+                  <span>MP3, WAV, AAC. Музыка тише оригинальной речи.</span>
+                  <input id="music" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg">
+                </label>
+                <div id="music-info" class="hint"></div>
+              </div>
               <p class="file-limit" id="file-limit">MP4, MOV, MKV и другие форматы FFmpeg · до 2 ГБ на файл</p>
             </section>
             <section class="card brief-card">
               <div class="section-title"><span class="step">02</span><h2>Задание на монтаж</h2></div>
               <label class="sr-only" for="brief">Текст задания</label>
               <textarea id="brief" rows="4" maxlength="10000" placeholder="Опишите задумку и важные детали…&#10;&#10;звук: нет&#10;длительность: 15"></textarea>
-              <p class="hint">Автоматически исполняются только команды ниже; свободное описание сохраняется как заметка.</p>
+              <p class="hint" id="brief-mode-hint">В Reference Clone свободное описание сохраняется как заметка; в Smart Reels Gemini учитывает вашу задачу при выборе лучших моментов.</p>
               <details class="brief-help"><summary>Как работает текстовое задание</summary><p>Пока это не свободное AI-управление. Исполняются только отдельные строки команд:</p><code>звук: нет / референс / исходник<br>режим: fit / native<br>длительность: 15</code><p>В каждой строке укажите одно значение. Команды имеют приоритет над настройками ниже. Остальной текст сохраняется для редактора и не исполняется автоматически.</p></details>
-              <div class="options-grid">
+              <div class="options-grid" id="reference-options">
                 <div><label for="mode">Скорость</label><select id="mode"><option value="fit">Подогнать под референс</option><option value="native">Сохранить исходную</option></select></div>
                 <div><label for="audio">Аудио</label><select id="audio"><option value="none">Без звука</option><option value="reference">Из референса</option><option value="source">Из первого исходника</option></select></div>
               </div>
               <div class="notice" style="margin:12px 0;padding:12px;border:1px solid #d7e4df;border-radius:10px;background:#f0f6f2;">
-                <label class="checkbox-label" style="font-weight:600"><input type="checkbox" id="ai-semantic"> 🧠 AI-подбор сцен через Gemini (экспериментальный)</label>
-                <p class="hint">По вашему отдельному подтверждению сжатые копии референса и исходников, включая звук, передаются Google для анализа. До 3 исходников и 60 секунд на файл. Может расходовать API-квоту. Учитывает содержание сцен, но НЕ переносит сложные эффекты автоматически.</p>
+                <label class="checkbox-label" style="font-weight:600"><input type="checkbox" id="ai-semantic"> 🧠 Использовать Gemini (экспериментальный)</label>
+                <p class="hint" id="ai-consent-hint">В Reference Clone Gemini анализирует сцены до 60 секунд, до 3 исходников. В Smart Reels анализируется один ролик до 30 минут. Сжатая копия со звуком передаётся Google только с вашего согласия. Возможны ограничения бесплатной квоты. Это не полноценный VFX-редактор.</p>
               </div>
               <p class="hint" id="mode-hint">Fit меняет скорость исходников под длину сцен референса.</p>
               <details class="advanced"><summary>Дополнительные настройки</summary><div class="duration-field"><label for="duration">Обрезать результат до, секунд</label><input id="duration" type="number" min="0.1" max="3600" step="0.1" placeholder="Длина референса"><p class="hint">Обрезка конца видео; не удлиняет референс.</p></div><label class="checkbox-label"><input type="checkbox" id="align-audio" checked> Автоматически определять сцены по общему звуку</label><p class="hint">Работает только при наличии общей звуковой дорожки.</p></details>
@@ -75,7 +92,7 @@
           </section>
           <section class="card versions-card" id="versions-card" hidden><div class="section-title"><h2>Версии монтажа</h2><span class="small-label">СОХРАНЯЮТСЯ</span></div><div id="versions"></div><div class="artifact-links" id="artifact-links" hidden><a id="project-link">Проект JSON ↗</a><a id="qa-link" target="_blank" rel="noopener">Отчёт проверки ↗</a><a id="comparison-link" target="_blank" rel="noopener">Сравнение кадров ↗</a></div></section>
           <div id="warnings" class="notice warning" hidden></div>
-          <aside class="capabilities"><span class="info-icon" aria-hidden="true">i</span><div><h3>Что переносится из референса</h3><p>Обнаруженные жёсткие склейки и чёрные боковые маски. Анализ также отмечает кандидаты вспышек; они не добавляются автоматически.</p><p>Смысловой подбор кадров и распознавание сложных эффектов пока не реализованы. Zoom, blur, shake и speed ramps доступны через ручной JSON-рецепт.</p></div></aside>
+          <aside class="capabilities"><span class="info-icon" aria-hidden="true">i</span><div><h3>Возможности этой версии</h3><p>Reference Clone: измеряет склейки, чёрные/белые боковые панели и яркие вспышки. Gemini помогает выбрать подходящие исходники, но сложные VFX по-прежнему не копируются автоматически.</p><p>Smart Reels (бета): Gemini выбирает интересные фрагменты длинного видео, FFmpeg собирает вертикальный ролик с сохранением речи и приглушённой фоновой музыкой. Выбор моментов и центрирование кадра требуют проверки.</p></div></aside>
         </section>
       </div>
     </form>
