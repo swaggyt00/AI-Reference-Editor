@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 from .analyzer import video_metadata
 from .effects import apply as apply_effects, source_curve
+from .transfer_fx import apply_white_panels, apply_reference_flash
 
 
 class SourceReader:
@@ -90,6 +91,11 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None,*,progres
                 frame=apply_effects(frame,t,project.get('effects',[]),i)
                 bounds=project['reference_analysis']['edge_masks'][i]
                 frame=effect_mask(frame,bounds)
+                whites=project['reference_analysis'].get('white_edge_masks', [])
+                if i < len(whites):
+                    frame=apply_white_panels(frame, whites[i])
+                if project.get('transfer_ref_flashes', True):
+                    frame=apply_reference_flash(frame, i, project['reference_analysis'].get('flash_events', []))
                 try:pipe.stdin.write(frame.tobytes())
                 except BrokenPipeError:
                     break
