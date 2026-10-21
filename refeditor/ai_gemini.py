@@ -31,7 +31,8 @@ def load_api_key(project_root=None):
     quoted = str(secret.resolve()).replace("'", "''")
     script = (
         "$ErrorActionPreference='Stop';"
-        f"$s = Get-Content -LiteralPath '{quoted}' -Raw | ConvertTo-SecureString;"
+        f"$line = Get-Content -LiteralPath '{quoted}' -Encoding ASCII -TotalCount 1;"
+        "$s = ConvertTo-SecureString -String $line;"
         "$p = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($s);"
         "try {[Console]::Out.Write([Runtime.InteropServices.Marshal]::PtrToStringBSTR($p))}"
         "finally {[Runtime.InteropServices.Marshal]::ZeroFreeBSTR($p)}"
@@ -42,7 +43,10 @@ def load_api_key(project_root=None):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20, check=False
     )
     if result.returncode:
-        raise RuntimeError("Unable to decrypt Gemini key. Use configure-gemini.cmd under the same Windows account.")
+        raise RuntimeError(
+            "Unable to decrypt local Gemini key. The encrypted file may be damaged, "
+            "or Windows account changed. Run configure-gemini.cmd again."
+        )
     key = result.stdout.decode("utf-8-sig", errors="replace").strip()
     if len(key) < 15:
         raise RuntimeError("The Gemini key is invalid or empty. Run configure-gemini.cmd again.")
@@ -57,6 +61,18 @@ def get_client():
             "Optional Gemini dependency is missing. Run: python -m pip install -r requirements-ai.txt"
         ) from exc
     return genai.Client(api_key=load_api_key())
+
+
+def check_local_setup():
+    """No network requests: verify that key can be decrypted and SDK imports."""
+    key = load_api_key()
+    if not key or len(key) < 15:
+        raise RuntimeError("Saved Gemini API key is empty or damaged.")
+    try:
+        from google import genai
+    except ImportError as exc:
+        raise RuntimeError("Gemini SDK missing. Install requirements-ai.txt.") from exc
+    return {"status": "local_key_ready", "sdk": "google-genai", "key_characters": len(key)}
 
 
 def check_connection(model=DEFAULT_MODEL):
