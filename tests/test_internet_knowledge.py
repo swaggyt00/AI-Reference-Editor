@@ -10,7 +10,7 @@ from unittest.mock import patch
 from refeditor.internet_knowledge import (
     get_relevant_techniques, director_knowledge, load_index, safe_record, tokenize
 )
-from scripts.refresh_knowledge import clean_text, get_metadata, refresh
+from scripts.refresh_knowledge import clean_text, get_metadata, refresh, bounded_discover
 
 
 class InternetKnowledgeTests(unittest.TestCase):
@@ -72,7 +72,7 @@ class InternetKnowledgeTests(unittest.TestCase):
                         "online_headings":["Usage"]}
             counts=refresh(index_path=path,fetch=fake)
             result=json.loads(path.read_text(encoding="utf-8"))
-            self.assertEqual(counts,{"fetched":1,"unavailable":1})
+            self.assertEqual(counts,{"fetched":1,"unavailable":1,"discovered":0})
             self.assertEqual(result["sources"][0]["online_title"],"New docs title")
             self.assertEqual(result["sources"][1]["title"],"Interpolation")
             self.assertEqual(result["sources"][1]["status"],"unavailable")
@@ -94,6 +94,39 @@ class InternetKnowledgeTests(unittest.TestCase):
         self.assertEqual(meta["online_title"],"Transitions")
         self.assertEqual(meta["online_headings"],["Overview"])
         self.assertNotIn("Not stored.",json.dumps(meta))
+
+    def test_official_discovery_never_follows_external_media_urls(self):
+        found=bounded_discover(
+            "https://www.remotion.dev/docs/resources",
+            ["/docs/transitions/zoom-blur",
+             "https://evil.example.com/docs/transitions/x",
+             "https://www.remotion.dev/blog/marketing",
+             "https://www.remotion.dev/docs/captions/displaying",
+             "https://www.remotion.dev/docs/video.mp4",
+             "https://www.remotion.dev/docs/../../etc/video"],
+            {"https://www.remotion.dev/docs/captions/displaying"}
+        )
+        self.assertTrue(any("zoom-blur" in item["url"] for item in found))
+        self.assertTrue(all(x["url"].startswith("https://www.remotion.dev/docs/") for x in found))
+        self.assertTrue(all(x["implementation"]=="research_only" for x in found))
+        self.assertFalse(any("evil.example" in x["url"] for x in found))
+
+    def test_refresh_discovers_new_online_method_without_storing_videos(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/"knowledge.json"
+            record=dict(self.data["sources"][0],id="remotion-transitions")
+            path.write_text(json.dumps({"schema_version":1,"sources":[record]}))
+            def fetch(url):
+                return {"online_title":"Transitions","online_description":"Docs",
+                        "online_headings":["API"],"_found_links":[
+                            "/docs/transitions/zoom-blur","https://example.com/file.mp4"
+                        ]}
+            stats=refresh(path,fetch=fetch)
+            data=json.loads(path.read_text())
+            self.assertEqual(stats["discovered"],1)
+            self.assertEqual(len(data["sources"]),2)
+            self.assertNotIn("_found_links",str(data))
+            self.assertEqual(data["sources"][1]["implementation"],"research_only")
 
     def test_refuses_untrusted_sites(self):
         with self.assertRaises(ValueError):
