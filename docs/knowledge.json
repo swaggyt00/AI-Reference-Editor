@@ -1,0 +1,379 @@
+{
+  "schema_version": 1,
+  "generated_at": null,
+  "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
+  "sources": [
+    {
+      "id": "remotion-transitions",
+      "title": "Remotion transitions",
+      "url": "https://www.remotion.dev/docs/transitions/",
+      "tags": [
+        "transitions",
+        "wipes",
+        "fade",
+        "crosszoom",
+        "film burn",
+        "zoom blur",
+        "whip pan"
+      ],
+      "note": "Official transition API includes fade, slide, wipe, zoomBlur, crossZoom and filmBurn presentations. Requires the compatible @remotion/transitions package.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-series",
+      "title": "Remotion scene transitions",
+      "url": "https://www.remotion.dev/docs/transitioning",
+      "tags": [
+        "scene changes",
+        "timing",
+        "overlaps",
+        "cuts",
+        "pacing",
+        "montage"
+      ],
+      "note": "TransitionSeries overlaps adjacent scenes. Timing is measured in frames; overlap reduces combined duration.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-keyframes",
+      "title": "Remotion interpolate",
+      "url": "https://www.remotion.dev/docs/interpolate",
+      "tags": [
+        "keyframe",
+        "animation",
+        "scale",
+        "zoom",
+        "fade",
+        "typography",
+        "easing"
+      ],
+      "note": "Use interpolate with explicit frame points and clamp behavior for bounded motion.",
+      "mode": "reference",
+      "implementation": "implemented",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-spring",
+      "title": "Remotion spring",
+      "url": "https://www.remotion.dev/docs/spring",
+      "tags": [
+        "spring",
+        "pop",
+        "bounce",
+        "kinetic text",
+        "title",
+        "overshoot"
+      ],
+      "note": "Spring timing provides damped movement, useful only when observed in the reference.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-captions",
+      "title": "Remotion captions",
+      "url": "https://www.remotion.dev/docs/captions/",
+      "tags": [
+        "subtitle",
+        "captions",
+        "spoken word",
+        "tiktok",
+        "reels",
+        "kinetic text"
+      ],
+      "note": "Captions require actual transcript timing or user-supplied subtitles; do not invent text.",
+      "mode": "reels",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-tiktok",
+      "title": "Remotion TikTok captions",
+      "url": "https://www.remotion.dev/docs/captions/create-tiktok-style-captions",
+      "tags": [
+        "word highlight",
+        "kinetic captions",
+        "tiktok",
+        "reel",
+        "lyrics"
+      ],
+      "note": "Token-page grouping creates TikTok-style caption timing; transcription is still required.",
+      "mode": "reels",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-audio",
+      "title": "Remotion audio visualization",
+      "url": "https://www.remotion.dev/docs/audio/visualization",
+      "tags": [
+        "music beat",
+        "waveform",
+        "audio reactive",
+        "sound design",
+        "rhythm"
+      ],
+      "note": "Audio visualizers use waveform/spectrum data. This does not automatically implement beat-synced cutting.",
+      "mode": "reels",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-audio-usage",
+      "title": "Remotion using audio",
+      "url": "https://www.remotion.dev/docs/using-audio",
+      "tags": [
+        "music",
+        "voice",
+        "fade",
+        "volume",
+        "sound design"
+      ],
+      "note": "Video audio volume and timing should keep dialog intelligible; assess clipping after mixing.",
+      "mode": "reels",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "ffmpeg-filters",
+      "title": "FFmpeg filtergraph reference",
+      "url": "https://ffmpeg.org/ffmpeg-filters.html",
+      "tags": [
+        "xfade",
+        "overlay",
+        "zoompan",
+        "blend",
+        "lut",
+        "crop",
+        "transitions",
+        "optical effects"
+      ],
+      "note": "Official reference for filter graphs, xfade, overlay, zoompan and audio filters. Validate on a test render before enabling.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "opencv-flow",
+      "title": "OpenCV optical flow",
+      "url": "https://docs.opencv.org/4.x/d4/dee/tutorial_optical_flow.html",
+      "tags": [
+        "tracking",
+        "motion tracking",
+        "camera movement",
+        "optical flow",
+        "stabilization"
+      ],
+      "note": "Optical flow estimates movement between images; not a full automatic object-aware compositor.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "opencv-template",
+      "title": "OpenCV template matching",
+      "url": "https://docs.opencv.org/4.x/d4/dc6/tutorial_py_template_matching.html",
+      "tags": [
+        "logo",
+        "sprite",
+        "match graphics",
+        "tracking",
+        "overlays"
+      ],
+      "note": "Template matching can localize known templates; limitations include scale and occlusion.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "gemini-video",
+      "title": "Google Gemini video understanding",
+      "url": "https://ai.google.dev/gemini-api/docs/video-understanding",
+      "tags": [
+        "video understanding",
+        "scene analysis",
+        "sources",
+        "director",
+        "timestamps"
+      ],
+      "note": "Model video descriptions may miss short effects; keep pixel timing from local frame analysis.",
+      "mode": "reference",
+      "implementation": "implemented",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-motionblur",
+      "title": "Remotion motion blur",
+      "url": "https://www.remotion.dev/docs/motion-blur",
+      "tags": [
+        "blur",
+        "motion blur",
+        "whip",
+        "velocity",
+        "shutter"
+      ],
+      "note": "HTML-in-canvas blur or camera motion blur can smooth graphic movement; not yet wired into this editor.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-animated-marks",
+      "title": "Remotion animation utilities",
+      "url": "https://www.remotion.dev/docs/animation-utils/",
+      "tags": [
+        "rotation",
+        "transform",
+        "scale",
+        "animate",
+        "skew",
+        "3d"
+      ],
+      "note": "Transform helpers can build controlled kinetic typography and graphic motion.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-resources",
+      "title": "Remotion education and examples",
+      "url": "https://www.remotion.dev/docs/resources",
+      "tags": [
+        "motion design",
+        "examples",
+        "graphics",
+        "tutorials",
+        "storytelling"
+      ],
+      "note": "Links to official guides, example projects and third-party tutorials; no videos are copied or retained.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-display-captions",
+      "title": "Remotion displayed captions",
+      "url": "https://www.remotion.dev/docs/captions/displaying",
+      "tags": [
+        "captions",
+        "subtitles",
+        "words",
+        "karaoke",
+        "tiktok"
+      ],
+      "note": "Word highlighting and styled caption sequences require real aligned transcript tokens.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "opencv-background",
+      "title": "OpenCV background subtraction",
+      "url": "https://docs.opencv.org/4.10.0/d1/dc5/tutorial_background_subtraction.html",
+      "tags": [
+        "mask",
+        "foreground",
+        "rotoscope",
+        "static camera",
+        "background"
+      ],
+      "note": "Static-camera background subtraction can help some foreground masks; camera motion breaks assumptions.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-editor-features",
+      "title": "Remotion editor features",
+      "url": "https://www.remotion.dev/docs/editor-starter/features",
+      "tags": [
+        "video editing",
+        "multi layer",
+        "keyframes",
+        "tracks",
+        "timeline",
+        "captions"
+      ],
+      "note": "Commercial editor starter functionality is not included in this open editor; useful as implementation research only.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    }
+  ]
+}

@@ -1,5 +1,43 @@
 # AI Reference Editor — Codex MVP
 
+## Internet Editing Intelligence (online knowledge, zero video library)
+
+**No reference-video training collection on your PC.** The editor's new research
+mode works with public **documentation metadata**, not downloaded YouTube clips,
+full tutorials or footage. Its text index is published openly at
+[`docs/knowledge.json`](docs/knowledge.json) in GitHub, never a local media database.
+
+- Seeded with 18 official technical resources: Remotion transitions, timing,
+  motion blur, captioning, graphic animation, audio, FFmpeg and OpenCV.
+- A GitHub Actions workflow (`learn-online.yml`) runs **Monday and Thursday**
+  and may be triggered manually in GitHub Actions. It checks allowlisted
+  documentation pages for changes and discovers **up to four new official
+  documentation pages per run**, at most 60 total. No videos, images,
+  articles, scripts, or third-party executable code are downloaded into the
+  index; it stores brief titles, descriptions, headings, links, and status.
+- When Gemini is already enabled for a user-approved edit, Python fetches
+  the **small JSON text index in memory** from the public GitHub repository,
+  selects up to six relevant references and includes them in the AI
+  director/highlights prompt. If GitHub is unreachable, bundled notes are used.
+- Sources distinguish **`implemented` vs `research_only`**. Learning that
+  an effect exists does NOT add its implementation automatically or guarantee
+  an exact reference clone. LLM weights are not fine-tuned and no arbitrary web
+  instructions are treated as commands.
+- **Privacy:** no Gemini key is used by GitHub Actions. The knowledge refresh
+  never touches user media. During actual editing, original user-uploaded
+  videos **are still processed and stored in `output/web` on the Windows
+  render machine until manually removed**; no learning-video archive is created.
+  The existing consent is required for sending compressed video/audio proxies
+  or storyboards to Gemini. This change does not automatically delete editing
+  projects or exports.
+
+This is the **first online research layer**, not a self-training senior editor:
+creative quality still requires real end-to-end evaluation against references.
+The remote workflow depends on GitHub Actions being enabled and may be delayed
+or skipped by GitHub scheduling. Source availability and provider quotas can
+change.
+
+
 ## Graphic reconstruction v3 — evidence-first overlays
 
 In **Reference Clone + Gemini + Motion Design**, the director now sends up to
