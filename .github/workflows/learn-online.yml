@@ -1,5 +1,10 @@
 name: Internet editing knowledge refresh
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/learn-online.yml'
+      - 'docs/knowledge.json'
   schedule:
     - cron: '17 5 * * 1,4'
   workflow_dispatch:
