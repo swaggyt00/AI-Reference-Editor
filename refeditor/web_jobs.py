@@ -153,8 +153,9 @@ class ProjectStore:
                 if len(ids) > 3:
                     raise ValueError('Первый AI-режим поддерживает до 3 исходников за один запуск.')
                 selected = [state['reference'], *(assets[i] for i in ids)]
-                if any(asset['metadata']['duration'] > 60 for asset in selected):
-                    raise ValueError('Первый AI-режим принимает видео до 60 секунд каждое.')
+                max_clip = 120 if settings.get('motion_design') else 60
+                if any(asset['metadata']['duration'] > max_clip for asset in selected):
+                    raise ValueError('AI-режим принимает видео до ' + str(max_clip) + ' секунд каждое.')
             rid = uuid4().hex
             prefix = f'/api/projects/{pid}/renders/{rid}/files/'
             run = {'id': rid, 'version': len(state['renders']) + 1, 'status': 'queued',
