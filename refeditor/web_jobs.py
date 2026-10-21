@@ -113,6 +113,31 @@ class ProjectStore:
             self.directory(pid)
             return deepcopy(self.projects[pid])
 
+    def list_projects(self):
+        """Small local project summaries; never expose filesystem paths."""
+        with self.lock:
+            results = []
+            for pid, state in self.projects.items():
+                folder = self.directory(pid)
+                reference = state.get('reference')
+                music = state.get('music')
+                sources = state.get('sources', [])
+                media = ([reference] if reference else []) + sources + ([music] if music else [])
+                try:
+                    updated = (folder / 'state.json').stat().st_mtime
+                except OSError:
+                    updated = 0
+                results.append({
+                    'id': pid,
+                    'reference_name': reference['name'] if reference else None,
+                    'sources': len(sources),
+                    'renders': len(state.get('renders', [])),
+                    'uploaded_bytes': sum(a.get('size', 0) for a in media),
+                    'busy': self.busy(pid) or pid in self.uploading,
+                    'updated': updated,
+                })
+            return sorted(results, key=lambda row: row['updated'], reverse=True)
+
     def delete_media(self, pid, asset_id):
         """Physically remove one uploaded file, not its already exported MP4s.
 
