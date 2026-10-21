@@ -942,3 +942,16 @@ progress::-moz-progress-bar {
   .top-actions { gap:7px; flex-wrap:wrap; justify-content:flex-end; }
   #delete-project { font-size:11px; padding:8px 10px; }
 }
+
+.project-library { display:grid; gap:10px; margin-top:16px; }
+.project-row { display:flex; align-items:center; justify-content:space-between; gap:14px;
+  border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+.project-label { display:grid; gap:4px; min-width:0; overflow-wrap:anywhere; }
+.project-label strong { font-size:13px; }
+.project-label small { color:var(--muted); font-size:11px; line-height:1.5; }
+.project-actions { display:flex; gap:8px; flex-shrink:0; }
+@media(max-width:680px) {
+  .project-row { align-items:flex-start; flex-direction:column; }
+  .project-actions { width:100%; }
+  .project-actions button { flex:1; justify-content:center; }
+}
