@@ -19,15 +19,17 @@ AI_MAX_SCENES = 12
 AI_MIN_CONFIDENCE = .65
 
 
-def validate_budget(reference, sources, segments):
-    """Protect free-tier users against accidental excessive API usage."""
+def validate_budget(reference, sources, segments, *, motion_design=False):
+    """Hard, stated pilot limits; longer reference only for explicit Motion Design."""
     if not (1 <= len(sources) <= AI_MAX_SOURCES):
         raise ValueError("AI pilot supports up to three source videos per render.")
-    if len(segments) > AI_MAX_SCENES:
-        raise ValueError("AI pilot supports up to twelve reference shots.")
+    max_scenes = 40 if motion_design else AI_MAX_SCENES
+    if len(segments) > max_scenes:
+        raise ValueError("AI reference has too many distinct shots for this pilot.")
+    max_seconds = 120 if motion_design else AI_MAX_CLIP_SECONDS
     for file in [reference, *sources]:
-        if video_metadata(file)["duration"] > AI_MAX_CLIP_SECONDS:
-            raise ValueError("AI pilot accepts videos of at most 60 seconds each.")
+        if video_metadata(file)["duration"] > max_seconds:
+            raise ValueError("AI pilot accepts videos up to " + str(max_seconds) + " seconds.")
     return True
 
 
@@ -115,7 +117,8 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
     One model call per uncached uploaded video + one text-only director call.
     Models may have quotas, so abort rather than silently falling back.
     """
-    validate_budget(reference_path, source_paths, project["segments"])
+    validate_budget(reference_path, source_paths, project["segments"],
+                    motion_design=bool(project.get("motion_design")))
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     if progress:
