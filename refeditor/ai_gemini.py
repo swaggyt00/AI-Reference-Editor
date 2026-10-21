@@ -13,7 +13,7 @@ import subprocess
 import tempfile
 import time
 
-DEFAULT_MODEL = "gemini-3.8-flash"
+DEFAULT_MODEL = "gemini-3.6-flash"
 
 def safe_error_reason(exc):
     """Render safe actionable error text. Never include API keys or request bodies."""
