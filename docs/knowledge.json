@@ -252,6 +252,128 @@
       "online_headings": [],
       "checked_at": null,
       "status": "not_checked"
+    },
+    {
+      "id": "remotion-motionblur",
+      "title": "Remotion motion blur",
+      "url": "https://www.remotion.dev/docs/motion-blur",
+      "tags": [
+        "blur",
+        "motion blur",
+        "whip",
+        "velocity",
+        "shutter"
+      ],
+      "note": "HTML-in-canvas blur or camera motion blur can smooth graphic movement; not yet wired into this editor.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-animated-marks",
+      "title": "Remotion animation utilities",
+      "url": "https://www.remotion.dev/docs/animation-utils/",
+      "tags": [
+        "rotation",
+        "transform",
+        "scale",
+        "animate",
+        "skew",
+        "3d"
+      ],
+      "note": "Transform helpers can build controlled kinetic typography and graphic motion.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-resources",
+      "title": "Remotion education and examples",
+      "url": "https://www.remotion.dev/docs/resources",
+      "tags": [
+        "motion design",
+        "examples",
+        "graphics",
+        "tutorials",
+        "storytelling"
+      ],
+      "note": "Links to official guides, example projects and third-party tutorials; no videos are copied or retained.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-display-captions",
+      "title": "Remotion displayed captions",
+      "url": "https://www.remotion.dev/docs/captions/displaying",
+      "tags": [
+        "captions",
+        "subtitles",
+        "words",
+        "karaoke",
+        "tiktok"
+      ],
+      "note": "Word highlighting and styled caption sequences require real aligned transcript tokens.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "opencv-background",
+      "title": "OpenCV background subtraction",
+      "url": "https://docs.opencv.org/4.10.0/d1/dc5/tutorial_background_subtraction.html",
+      "tags": [
+        "mask",
+        "foreground",
+        "rotoscope",
+        "static camera",
+        "background"
+      ],
+      "note": "Static-camera background subtraction can help some foreground masks; camera motion breaks assumptions.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "remotion-editor-features",
+      "title": "Remotion editor features",
+      "url": "https://www.remotion.dev/docs/editor-starter/features",
+      "tags": [
+        "video editing",
+        "multi layer",
+        "keyframes",
+        "tracks",
+        "timeline",
+        "captions"
+      ],
+      "note": "Commercial editor starter functionality is not included in this open editor; useful as implementation research only.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
     }
   ]
 }
