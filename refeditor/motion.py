@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import uuid
+import re
 
 KINDS = {'title','caption','card','badge','route','image','video'}
 ANIMATIONS = {'rise','slide','pop','fade'}
@@ -63,6 +64,13 @@ def validate_motion_layers(layers, duration, available_assets=None):
                 continue
             out['text'] = text
             out['size'] = max(16,min(110,float(item.get('size',50))))
+            for key in ('color','background'):
+                # Accept only literal RGB colors, never CSS expressions from AI.
+                value=item.get(key)
+                if isinstance(value,str) and re.fullmatch(r'#[0-9a-fA-F]{6}',value):
+                    out[key]=value
+            if item.get('align') in ('left','center','right'):
+                out['align']=item['align']
             if kind == 'route':
                 pts = item.get('points')
                 if not isinstance(pts,list) or not 2 <= len(pts) <= 12:
