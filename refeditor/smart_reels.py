@@ -92,7 +92,8 @@ def propose_highlights(source, target_seconds=60, brief="", model=DEFAULT_MODEL)
                 if time.monotonic() > deadline:
                     raise TimeoutError("Gemini Files API processing timeout")
                 time.sleep(4)
-                remote = client.files.get(name=remote.name)
+                remote = call_with_overload_retry(
+                    lambda: client.files.get(name=remote.name))
             if getattr(getattr(remote, "state", None), "name", None) != "ACTIVE":
                 raise RuntimeError("Gemini remote video was not ready for analysis")
             # Optional tiny public docs index, never the user's footage.
