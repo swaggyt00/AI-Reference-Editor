@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from refeditor.ai_gemini import DEFAULT_MODEL, analyze_video, load_api_key
+from refeditor.ai_gemini import DEFAULT_MODEL, analyze_video, load_api_key, safe_error_reason, check_local_setup
 
 
 class GeminiSafetyTests(unittest.TestCase):
@@ -30,6 +30,30 @@ class GeminiSafetyTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "role"):
             analyze_video("nonexistent.mp4", "unused.json",
                           role="editor", confirm_external_upload=True)
+
+    def test_no_secret_in_generic_error(self):
+        message = safe_error_reason(RuntimeError("SECRET-KEY-EXAMPLE"))
+        self.assertNotIn("SECRET-KEY-EXAMPLE", message)
+
+    def test_known_local_setup_message_is_safe(self):
+        message = safe_error_reason(RuntimeError("Gemini API key not configured. Run configure-gemini.cmd first."))
+        self.assertIn("configure-gemini.cmd", message)
+
+    def test_http_429_is_actionable(self):
+        error = Exception("response containing secret")
+        error.code = 429
+        reason = safe_error_reason(error)
+        self.assertIn("429", reason)
+        self.assertNotIn("secret", reason)
+
+    def test_local_check_does_not_make_api_call(self):
+        with patch("refeditor.ai_gemini.load_api_key", return_value="local-dummy-key-123456789"):
+            from unittest.mock import MagicMock
+            import sys
+            with patch.dict(sys.modules, {"google.genai": MagicMock()}):
+                result = check_local_setup()
+                self.assertEqual(result['status'], 'local_key_ready')
+
 
 
 if __name__ == "__main__":
