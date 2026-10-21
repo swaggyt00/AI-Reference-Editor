@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5f1">
+  <title>AI Reference Editor — монтаж по референсу</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+  <meta name="referrer" content="no-referrer">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="AI Reference Editor, главная"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><span>REFERENCE<span class="brand-sub">EDITOR / WORKSPACE</span></span></a>
+    <div class="top-actions"><span class="connection" id="connection">Проверка движка…</span><button type="button" class="button subtle" id="new-project">＋ Новый проект</button></div>
+  </header>
+  <main>
+    <div class="page-heading"><div><p class="eyebrow">ВАШИ КАДРЫ. РИТМ РЕФЕРЕНСА.</p><h1>Соберите свой монтаж<span>.</span></h1><p class="intro">От референса и исходников — к первой версии видео.</p></div><span class="local-badge">GitHub Pages · обработка на вашем ПК</span></div>
+    <div class="notice" role="note" style="margin-bottom:1rem;background:#e8f2ed;border:1px solid #c8d9ce;border-radius:12px;padding:12px 16px;">
+      <strong>Монтаж на вашем ПК.</strong> GitHub Pages показывает только интерфейс.
+      Для обработки видео запустите <code>start-editor.cmd</code> на своём Windows-компьютере и держите окно открытым.
+      Видео передаётся напрямую браузером в локальный движок <code>127.0.0.1:8000</code>, а не на GitHub.
+      <a href="https://github.com/swaggyt00/AI-Reference-Editor#github-pages--windows">Инструкция</a>.
+    </div>
+    <div id="error" class="notice error" role="alert" hidden></div>
+    <form id="editor-form">
+      <div class="workspace">
+        <section class="inputs-column" aria-label="Настройки монтажа">
+          <fieldset id="editor-fields">
+            <section class="card">
+              <div class="section-title"><span class="step">01</span><h2>Материалы</h2><span class="small-label">НАЧНИТЕ ЗДЕСЬ</span></div>
+              <label class="field-label" for="reference">Референс <span>Одно готовое видео</span></label>
+              <label class="dropzone reference-drop" id="reference-drop" for="reference">
+                <span class="upload-icon" aria-hidden="true">↥</span><strong>Выберите референс</strong><span>или перетащите видео сюда</span>
+                <input id="reference" type="file" accept="video/*,.mkv,.mov,.mxf,.avi,.webm,.mts,.m2ts">
+              </label>
+              <div id="reference-info" class="reference-info" hidden></div>
+              <div class="field-heading"><label class="field-label" for="sources">Исходные видео</label><span id="source-count">0 / 32</span></div>
+              <label class="dropzone source-drop" id="source-drop" for="sources"><span aria-hidden="true">＋</span><strong>Добавить исходники</strong><span>Можно несколько файлов</span><input id="sources" type="file" multiple accept="video/*,.mkv,.mov,.mxf,.avi,.webm,.mts,.m2ts"></label>
+              <ol id="source-list" class="source-list"></ol>
+              <p class="hint" id="library-status" hidden></p>
+              <button type="button" class="button restore-button" id="restore-sources" hidden>Вернуть загруженные исходники</button>
+              <p class="hint">Порядок исходников влияет на монтаж: движок распределяет их по сценам последовательно.</p>
+              <p class="file-limit" id="file-limit">MP4, MOV, MKV и другие форматы FFmpeg · до 2 ГБ на файл</p>
+            </section>
+            <section class="card brief-card">
+              <div class="section-title"><span class="step">02</span><h2>Задание на монтаж</h2></div>
+              <label class="sr-only" for="brief">Текст задания</label>
+              <textarea id="brief" rows="4" maxlength="10000" placeholder="Опишите задумку и важные детали…&#10;&#10;звук: нет&#10;длительность: 15"></textarea>
+              <p class="hint">Автоматически исполняются только команды ниже; свободное описание сохраняется как заметка.</p>
+              <details class="brief-help"><summary>Как работает текстовое задание</summary><p>Пока это не свободное AI-управление. Исполняются только отдельные строки команд:</p><code>звук: нет / референс / исходник<br>режим: fit / native<br>длительность: 15</code><p>В каждой строке укажите одно значение. Команды имеют приоритет над настройками ниже. Остальной текст сохраняется для редактора и не исполняется автоматически.</p></details>
+              <div class="options-grid">
+                <div><label for="mode">Скорость</label><select id="mode"><option value="fit">Подогнать под референс</option><option value="native">Сохранить исходную</option></select></div>
+                <div><label for="audio">Аудио</label><select id="audio"><option value="none">Без звука</option><option value="reference">Из референса</option><option value="source">Из первого исходника</option></select></div>
+              </div>
+              <p class="hint" id="mode-hint">Fit меняет скорость исходников под длину сцен референса.</p>
+              <details class="advanced"><summary>Дополнительные настройки</summary><div class="duration-field"><label for="duration">Обрезать результат до, секунд</label><input id="duration" type="number" min="0.1" max="3600" step="0.1" placeholder="Длина референса"><p class="hint">Обрезка конца видео; не удлиняет референс.</p></div><label class="checkbox-label"><input type="checkbox" id="align-audio"> Выравнивать по совпадающему аудио</label><p class="hint">Работает только при наличии общей звуковой дорожки.</p></details>
+              <p class="hint" id="audio-hint" hidden>Используйте звук, на который у вас есть разрешение. Дорожка первого исходника берётся с начала; автоматического звукового монтажа нет.</p>
+            </section>
+          </fieldset>
+          <button class="button primary run-button" id="run" type="submit"><span aria-hidden="true">▶</span> Анализировать и смонтировать <span aria-hidden="true">↗</span></button>
+          <p class="under-button" id="run-hint">Файлы обрабатываются на сервере этого приложения.</p>
+        </section>
+        <section class="result-column" aria-label="Результат монтажа">
+          <div class="preview-card">
+            <div class="preview-header"><div><span class="live-dot"></span><h2>Предпросмотр</h2></div><span id="preview-label">MP4 / H.264</span></div>
+            <div class="preview-stage">
+              <div id="empty-preview"><span class="preview-symbol" aria-hidden="true">▷</span><h3>Здесь будет ваш монтаж</h3><p>Добавьте материалы и запустите обработку.<br>Готовое видео можно посмотреть и скачать.</p><div class="decorative-timeline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>
+              <video id="preview" controls playsinline preload="metadata" hidden aria-label="Готовое видео"></video>
+            </div>
+            <div class="preview-footer"><span id="result-meta">Ожидаем материалы</span><a id="download" class="button download" hidden>↓ Скачать MP4</a></div>
+          </div>
+          <section class="card progress-card" aria-label="Прогресс обработки">
+            <div class="progress-heading"><h2 id="stage">Готов к работе</h2><span id="percentage">—</span></div>
+            <progress id="progress" max="100" value="0" aria-label="Прогресс обработки"></progress>
+            <p id="progress-detail" role="status" aria-live="polite">Загрузите референс и хотя бы один исходник.</p>
+            <ol class="stage-list" aria-label="Этапы"><li>Загрузка</li><li>Анализ</li><li>Рендер</li><li>Проверка</li></ol>
+          </section>
+          <section class="card versions-card" id="versions-card" hidden><div class="section-title"><h2>Версии монтажа</h2><span class="small-label">СОХРАНЯЮТСЯ</span></div><div id="versions"></div><div class="artifact-links" id="artifact-links" hidden><a id="project-link">Проект JSON ↗</a><a id="qa-link" target="_blank" rel="noopener">Отчёт проверки ↗</a><a id="comparison-link" target="_blank" rel="noopener">Сравнение кадров ↗</a></div></section>
+          <div id="warnings" class="notice warning" hidden></div>
+          <aside class="capabilities"><span class="info-icon" aria-hidden="true">i</span><div><h3>Что переносится из референса</h3><p>Обнаруженные жёсткие склейки и чёрные боковые маски. Анализ также отмечает кандидаты вспышек; они не добавляются автоматически.</p><p>Смысловой подбор кадров и распознавание сложных эффектов пока не реализованы. Zoom, blur, shake и speed ramps доступны через ручной JSON-рецепт.</p></div></aside>
+        </section>
+      </div>
+    </form>
+    <footer class="page-footer"><span>AI REFERENCE EDITOR</span><span>Python + FFmpeg <span aria-hidden="true">·</span> Ваши материалы, каждый раз новый проект</span></footer>
+  </main>
+</body>
+</html>
