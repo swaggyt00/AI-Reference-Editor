@@ -1,5 +1,34 @@
 # AI Reference Editor — Codex MVP
 
+## Gemini 503 recovery and explicit model choice
+
+A Gemini 503/502/504 is normally a temporary Google server overload. Official
+Google SDKs already retry transient requests. The editor now allows **one extra
+bounded retry** for content-generation and Files-API polling after the SDK's
+internal retries. It does **not** retry 401/403/404 authentication/permission
+errors or 429 quota failures, and it does **not** blindly retry file uploads
+(which could duplicate files remotely).
+
+The browser shows a manual model selector when Gemini is enabled:
+- **Gemini 3.6 Flash** (default; unchanged).
+- **Gemini 3.8 Flash** (alternate, newer).
+- **Gemini 3.5 Flash-Lite** (lighter, possibly less accurate).
+These are documented video-capable Gemini model IDs, but account-specific
+availability and zero-cost usage are NOT guaranteed. The editor never switches
+models or enables billing automatically. The user must explicitly select a
+different model and approve any new Gemini request.
+
+After an overload, keep the SAME project and click **Render again** (or select
+a different model manually). Previously completed reference/source video
+semantic summaries are reused from the local project's AI cache as long as
+the original uploaded media ID still matches. Unfinished requests are retried,
+not guessed; successful videos do not need to be re-analyzed. Already uploaded
+media and old renders remain untouched. **The final director plan itself may
+still need a fresh model request after a failed run**, and a real Gemini call
+using a user's Windows key cannot be tested by GitHub Actions. The retry
+mechanism is verified with mocked 502/503/504/429/401 errors and existing
+local synthetic MP4 regression tests.
+
 ## Remove media and projects from the website (Windows local storage)
 
 The latest GitHub Pages interface includes:
