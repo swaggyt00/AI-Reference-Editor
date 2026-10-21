@@ -4,11 +4,13 @@ on:
     paths:
       - 'motion/**'
       - 'refeditor/motion.py'
+      - 'tests/test_motion.py'
       - '.github/workflows/motion.yml'
   pull_request:
     paths:
       - 'motion/**'
       - 'refeditor/motion.py'
+      - 'tests/test_motion.py'
       - '.github/workflows/motion.yml'
 jobs:
   motion:
