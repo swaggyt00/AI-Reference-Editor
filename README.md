@@ -1,5 +1,46 @@
 # AI Reference Editor — Codex MVP
 
+## Motion Design — prototype in development
+
+The new **Motion Design (beta)** mode extends Reference Clone using a Remotion
+compositor on the same Windows computer. It supports bounded, timeline-driven
+layers, including kinetic titles, captions, badges, information cards, abstract
+(animated) route diagrams, uploaded image overlays and B-roll video windows.
+Video windows use only material actually supplied by the user. Other source clips
+remain on the PC. Existing audio is preserved during overlay composition.
+
+**Install separately once:** double-click `setup-motion.cmd` (downloads Node.js
+from the official site after verifying SHA-256, then installs pinned Remotion
+packages) and restart `start-editor.cmd`. This does NOT require `winget`,
+paid cloud video rendering or Codex. Keep `tools/node` and `motion/node_modules`
+between restarts. This optional renderer is never required for normal edits.
+
+**Use:** Reference Clone + Gemini AI enabled + Motion Design checked. The model
+proposes a typed JSON motion plan based on actual graphics it finds in reference
+and source footage; the local Python validator rejects invalid/uncertain entries
+before Remotion creates the layers. Motion Design has a pilot limit of 120
+seconds per file and 40 reference shots, up to 3 source videos. The AI stage
+may consume free-tier requests and the remote video proxies include audio;
+the user confirms before Google upload.
+
+**Honest limitations:** This is only the first compositor milestone. It cannot
+yet reconstruct arbitrary After Effects projects, complex 3-D animation,
+rotoscoping, object tracking, backgrounds hidden by foreground objects, or
+accurately infer every font, title, transition or layered B-roll from a finished
+MP4. A picture-in-picture or custom media insert requires actual uploaded
+footage. A 76-second benchmark may need original graphics and additional
+media assets. The result needs visual review; do not assume pixel-perfect
+1:1 replication.
+
+**Remotion license:** Remotion is free for individuals and eligible small teams
+under its license. Larger commercial teams may require a paid company license.
+https://www.remotion.dev/docs/license
+
+Local smoke tests under GitHub Actions run real Remotion/Chromium rendering
+with synthetic media and verify its MP4 video+audio output. Gemini's actual
+video understanding needs the user's own encrypted Windows key, and is not
+simulated as "passed" for real creative editing quality.
+
 ## GitHub Pages + Windows
 
 The public HTML/JS frontend runs on **GitHub Pages**; all private video uploads and FFmpeg processing happen on **your own Windows machine** at `127.0.0.1:8000`, not on GitHub servers. Codex is not needed for everyday rendering.
