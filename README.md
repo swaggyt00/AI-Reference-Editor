@@ -37,15 +37,21 @@ Results: output/final.mp4, output/project.json, output/comparison.jpg and output
 
 Set effects in the generated project.json ONLY if verified in the reference. For instance, an effect recipe for zoom has type zoom, start, end, from, to and optional easing; blur has a sigma from/to; flash has strength; shake has amplitude_px and frequency_hz. Color uses contrast, brightness and saturation. Each segment can have speed_keyframes with at (normalized target time from 0 to 1) and speed. These are supported rendering recipes, not automatic detections.
 
-## Demo data
+## Universal workflow — any videos
 
-The four reference/source MP4s from the initial experiment are NOT COMMITTED because the repository is public. To run the same demo, you would need to place authorized copies at these paths:
-- demo/reference_01.mp4
-- demo/reference_04.mp4
-- demo/source_02.mp4
-- demo/source_03.mp4
+This repository is an **engine**, not a packaged demo for a fixed set of videos. Every editing job uses freshly supplied inputs:
 
-Then run bash run_demo.sh (Linux/macOS) or run_demo.bat (Windows). Otherwise run pipeline with your own files.
+- One or more reference videos to study; the current CLI analyzes one reference per run.
+- Any number of independent source footage clips; the current CLI accepts all paths supplied after `--sources`.
+- A task brief specifying the requested duration, pacing, edit style, and sounds.
+
+Example using **arbitrary paths**:
+
+    python -m refeditor pipeline --reference "/workspace/job_42/reference.mp4" --sources "/workspace/job_42/shots/a.mov" "/workspace/job_42/shots/b.mp4" "/workspace/job_42/shots/c.mp4" --output-dir output/job_42 --mode fit
+
+Replace the paths with actual files each time. No filenames, identity, setting or scene from previous jobs should be assumed.
+
+Personal media is intentionally excluded from git via .gitignore. The project does not require or contain any of the four earlier test videos.
 
 ## Limitations / roadmap
 
