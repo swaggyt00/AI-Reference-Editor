@@ -12,7 +12,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="./" aria-label="AI Reference Editor, главная"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><span>REFERENCE<span class="brand-sub">EDITOR / WORKSPACE</span></span></a>
-    <div class="top-actions"><span class="connection" id="connection">Нажмите «Подключить ПК»</span><button type="button" class="button subtle" id="connect-local">↔ Подключить ПК</button><button type="button" class="button subtle" id="new-project">＋ Новый проект</button></div>
+    <div class="top-actions"><span class="connection" id="connection">Нажмите «Подключить ПК»</span><button type="button" class="button subtle" id="connect-local">↔ Подключить ПК</button><button type="button" class="button subtle" id="new-project">＋ Новый проект</button><button type="button" class="button danger" id="delete-project" hidden>🗑 Удалить проект</button></div>
   </header>
   <main>
     <div class="page-heading"><div><p class="eyebrow">ВАШИ КАДРЫ. РИТМ РЕФЕРЕНСА.</p><h1>Соберите свой монтаж<span>.</span></h1><p class="intro">От референса и исходников — к первой версии видео.</p></div><span class="local-badge">GitHub Pages · обработка на вашем ПК</span></div>
@@ -46,6 +46,8 @@
               <ol id="source-list" class="source-list"></ol>
               <p class="hint" id="library-status" hidden></p>
               <button type="button" class="button restore-button" id="restore-sources" hidden>Вернуть загруженные исходники</button>
+              <div id="unused-source-list" class="source-list" aria-label="Исходники, убранные из монтажа" hidden></div>
+              <p class="hint">«Убрать из монтажа» оставляет файл на ПК. «🗑 Удалить» удаляет загруженный оригинал с ПК; готовые рендеры остаются, пока не удалишь весь проект.</p>
               <p class="hint" id="source-order-hint">Сцены сопоставляются по общему звуку, а при включённом Gemini — дополнительно по смыслу. Всегда проверяйте результат.</p>
               <div id="reels-fields" hidden>
                 <label class="field-label" for="reel-seconds">Длина итогового Reels, секунд</label>
@@ -57,6 +59,7 @@
                   <input id="music" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.flac,.ogg">
                 </label>
                 <div id="music-info" class="hint"></div>
+                <button type="button" class="button danger-lite" id="delete-music" hidden>🗑 Удалить музыку с ПК</button>
               </div>
               <p class="file-limit" id="file-limit">MP4, MOV, MKV и другие форматы FFmpeg · до 2 ГБ на файл</p>
             </section>
