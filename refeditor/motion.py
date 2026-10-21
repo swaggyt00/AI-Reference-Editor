@@ -122,14 +122,38 @@ def render_motion(base_video, layers, output, *, asset_files=None, duration=None
         shutil.copy2(base,work/video_name)
         mapping={}
         for idx,(key,path) in enumerate((asset_files or {}).items()):
-            if any(item.get('asset')==key for item in valid):
-                path=Path(path).resolve()
-                if not path.is_file() or path.suffix.lower() not in ('.png','.jpg','.jpeg','.webp','.mp4','.mov','.webm'):
-                    raise ValueError('Only local image or video assets are supported')
+            needed=[item for item in valid if item.get('asset')==key]
+            if not needed:
+                continue
+            path=Path(path).resolve()
+            if not path.is_file():
+                raise ValueError('Motion asset does not exist')
+            is_video=any(item['kind']=='video' for item in needed)
+            if is_video:
+                filename='asset-'+token+'-'+str(idx)+'.mp4'
+                dest=work/filename
+                # Uploaded assets carry .media extension; remux/transcode into
+                # a bounded, browser-compatible local MP4 before Remotion reads.
+                result=subprocess.run(['ffmpeg','-y','-v','error','-i',str(path),
+                    '-map','0:v:0','-an','-c:v','libx264','-preset','veryfast',
+                    '-crf','23','-pix_fmt','yuv420p',str(dest)],
+                    capture_output=True,text=True,timeout=900)
+                if result.returncode:
+                    raise RuntimeError('Cannot decode user-provided B-roll media.')
+                for item in needed:
+                    if item['kind']=='video':
+                        from .analyzer import video_metadata
+                        video_len=video_metadata(dest)['duration']
+                        if item.get('source_start',0)+(item['end']-item['start'])>video_len+.1:
+                            raise ValueError('Motion insert exceeds supplied source media duration')
+            else:
+                if path.suffix.lower() not in ('.png','.jpg','.jpeg','.webp'):
+                    raise ValueError('Image asset must be PNG, JPEG or WebP.')
                 filename='asset-'+token+'-'+str(idx)+path.suffix.lower()
                 dest=work/filename
-                shutil.copy2(path,dest);created.append(dest)
-                mapping[key]=filename
+                shutil.copy2(path,dest)
+            created.append(dest)
+            mapping[key]=filename
         for item in valid:
             if item['kind'] in ('image','video'):item['asset']=mapping[item['asset']]
         props_path.write_text(json.dumps({'baseFile':video_name,'layers':valid}),encoding='utf-8')
