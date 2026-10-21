@@ -198,6 +198,9 @@ Motion layers must accurately reconstruct ACTUALLY VISIBLE OVERLAYS ONLY:
   "points": [[0.2,0.8],[0.5,0.3]] tracing the reference graphic. DO NOT
   fabricate map geography or travel coordinates; abstract diagram only.
 - x and y: position of layer CENTER normalized between 0 and 1.
+- When visually clear, match exact foreground "color" and card "background"
+  as #RRGGBB and "align" as left/center/right. Omit if uncertain; never
+  guess unseen typography, logos, or hard-to-read text.
 - animation: fade, rise, slide or pop only if corresponding movement is visible.
 - confidence: use below 0.72 when uncertain, so it will not render.
 - The attached storyboard sheets show ACTUAL reference frames with FRAME indices
