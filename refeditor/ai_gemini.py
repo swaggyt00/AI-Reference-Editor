@@ -172,7 +172,8 @@ def analyze_video(video, output, *, role="reference", model=DEFAULT_MODEL,
                 if time.monotonic() > deadline:
                     raise TimeoutError("Gemini upload processing exceeded 4 minutes.")
                 time.sleep(3)
-                remote_file = client.files.get(name=remote_file.name)
+                remote_file = call_with_overload_retry(
+                    lambda: client.files.get(name=remote_file.name))
             state = getattr(getattr(remote_file, "state", None), "name", None)
             if state != "ACTIVE":
                 raise RuntimeError(f"Gemini Files API returned state {state!r}.")
