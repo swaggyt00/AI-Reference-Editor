@@ -12,8 +12,26 @@ const animated=(item,frame,fps)=>{
   const entry=smooth(Math.min(1,local/fi));
   const dx=item.animation==='slide'?(1-entry)*140:0;
   const dy=item.animation==='rise'?(1-entry)*70:0;
-  const scale=item.animation==='pop'?.72+.28*entry:1;
-  return {opacity,transform:'translate(-50%,-50%) translate('+dx+'px,'+dy+'px) scale('+scale+')'};
+  let scale=item.animation==='pop'?.72+.28*entry:1;
+  let position={};
+  let visible=opacity;
+  const track=item.track;
+  if(Array.isArray(track) && track.length>=2){
+    const now=frame/fps;
+    let left=track[0],right=track[track.length-1];
+    for(let i=1;i<track.length;i++){
+      if(track[i].time>=now){right=track[i];left=track[i-1];break;}
+    }
+    if(now<=track[0].time){left=right=track[0];}
+    if(now>=track[track.length-1].time){left=right=track[track.length-1];}
+    const u=left===right?0:Math.max(0,Math.min(1,(now-left.time)/(right.time-left.time)));
+    const mix=(a,b)=>a+(b-a)*u;
+    position={left:mix(left.x,right.x)*100+'%',top:mix(left.y,right.y)*100+'%'};
+    scale*=mix(left.scale,right.scale);
+    visible*=mix(left.opacity,right.opacity);
+  }
+  return {...position,opacity:visible,
+    transform:'translate(-50%,-50%) translate('+dx+'px,'+dy+'px) scale('+scale+')'};
 };
 
 const TextGraphic=({item})=>{
