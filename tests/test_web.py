@@ -209,7 +209,8 @@ class WebTests(unittest.TestCase):
         try:
             ok, frame = cap.read()
             self.assertTrue(ok)
-            self.assertGreater(float(frame[:, :, 0].mean()), float(frame[:, :, 2].mean()) + 100)
+            # With no shared audio, the first selected source is used for the first shot.
+            self.assertGreater(float(frame[:, :, 2].mean()), float(frame[:, :, 0].mean()) + 100)
         finally:
             cap.release()
 
