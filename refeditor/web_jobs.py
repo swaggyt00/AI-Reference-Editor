@@ -7,6 +7,7 @@ from copy import deepcopy
 import json
 import logging
 from pathlib import Path
+import shutil
 import re
 from threading import RLock
 from uuid import uuid4
@@ -111,6 +112,52 @@ class ProjectStore:
         with self.lock:
             self.directory(pid)
             return deepcopy(self.projects[pid])
+
+    def delete_media(self, pid, asset_id):
+        """Physically remove one uploaded file, not its already exported MP4s.
+
+        The state is never modified during an upload or a queued/running render.
+        Deleted source IDs disappear from the selected list and project library.
+        """
+        with self.lock:
+            folder = self.directory(pid)
+            if self.busy(pid) or pid in self.uploading:
+                raise ValueError('Дождитесь завершения загрузки или рендера перед удалением.')
+            if not re.fullmatch(r'[a-f0-9]{32}', asset_id):
+                raise KeyError(asset_id)
+            state = self.projects[pid]
+            assets = ([state['reference']] if state.get('reference') else [])
+            assets += state.get('sources', [])
+            assets += ([state['music']] if state.get('music') else [])
+            item = next((value for value in assets if value['id'] == asset_id), None)
+            if item is None:
+                raise KeyError(asset_id)
+            target = folder / 'media' / (asset_id + '.media')
+            if target.is_symlink():
+                raise ValueError('Небезопасный путь к файлу. Удаление отменено.')
+            # Unlink BEFORE changing saved state; Windows reports locked-file errors.
+            target.unlink(missing_ok=True)
+            if state.get('reference') and state['reference']['id'] == asset_id:
+                state['reference'] = None
+            elif state.get('music') and state['music']['id'] == asset_id:
+                state['music'] = None
+            else:
+                state['sources'] = [a for a in state['sources'] if a['id'] != asset_id]
+            self.save(state)
+            return deepcopy(state)
+
+    def delete_project(self, pid):
+        """Permanently remove ONLY this project's directory and all versions."""
+        with self.lock:
+            directory = self.directory(pid)
+            if self.busy(pid) or pid in self.uploading:
+                raise ValueError('Нельзя удалить проект во время загрузки или рендера.')
+            if directory.is_symlink() or directory.resolve().parent != self.root:
+                raise ValueError('Небезопасный путь к проекту. Удаление отменено.')
+            # Do not erase the in-memory project until the disk deletion succeeds.
+            shutil.rmtree(directory)
+            del self.projects[pid]
+            return {'deleted': True, 'project_id': pid}
 
     def media_path(self, pid, asset):
         return self.directory(pid) / 'media' / (asset['id'] + '.media')
