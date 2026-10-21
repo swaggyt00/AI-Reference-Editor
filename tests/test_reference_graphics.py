@@ -77,6 +77,29 @@ class GraphicTests(unittest.TestCase):
                            {'time':2,'x':.5,'y':.5}]}
         self.assertNotIn('track',validate_motion_layers([bad],5)[0])
 
+class TemporalGraphicTests(unittest.TestCase):
+    def test_pixel_sprite_over_static_textured_background(self):
+        from refeditor.graphic_reconstruction import extract_temporal_asset
+        rng=np.random.default_rng(10)
+        background=rng.integers(20,140,(180,320,3),dtype=np.uint8)
+        foreground=background.copy()
+        cv2.rectangle(foreground,(135,73),(181,108),(255,255,0),-1)
+        with tempfile.TemporaryDirectory() as d:
+            result=extract_temporal_asset(
+                foreground,background,[.28,.22,.45,.57],Path(d)/'sprite.png')
+            self.assertIsNotNone(result)
+            self.assertEqual(result['extraction'],'temporal_static_plate')
+            self.assertTrue((Path(d)/'sprite.png').is_file())
+
+    def test_moving_camera_does_not_become_a_sticker(self):
+        from refeditor.graphic_reconstruction import extract_temporal_asset
+        rng=np.random.default_rng(10)
+        background=rng.integers(20,140,(180,320,3),dtype=np.uint8)
+        moving=np.roll(background,9,axis=1)
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(extract_temporal_asset(
+                moving,background,[.28,.22,.45,.57],Path(d)/'sprite.png'))
+
 
 if __name__=='__main__':
     unittest.main()
