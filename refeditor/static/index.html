@@ -47,7 +47,7 @@
                 <div><label for="audio">Аудио</label><select id="audio"><option value="none">Без звука</option><option value="reference">Из референса</option><option value="source">Из первого исходника</option></select></div>
               </div>
               <p class="hint" id="mode-hint">Fit меняет скорость исходников под длину сцен референса.</p>
-              <details class="advanced"><summary>Дополнительные настройки</summary><div class="duration-field"><label for="duration">Обрезать результат до, секунд</label><input id="duration" type="number" min="0.1" max="3600" step="0.1" placeholder="Длина референса"><p class="hint">Обрезка конца видео; не удлиняет референс.</p></div><label class="checkbox-label"><input type="checkbox" id="align-audio"> Выравнивать по совпадающему аудио</label><p class="hint">Работает только при наличии общей звуковой дорожки.</p></details>
+              <details class="advanced"><summary>Дополнительные настройки</summary><div class="duration-field"><label for="duration">Обрезать результат до, секунд</label><input id="duration" type="number" min="0.1" max="3600" step="0.1" placeholder="Длина референса"><p class="hint">Обрезка конца видео; не удлиняет референс.</p></div><label class="checkbox-label"><input type="checkbox" id="align-audio" checked> Автоматически определять сцены по общему звуку</label><p class="hint">Работает только при наличии общей звуковой дорожки.</p></details>
               <p class="hint" id="audio-hint" hidden>Используйте звук, на который у вас есть разрешение. Дорожка первого исходника берётся с начала; автоматического звукового монтажа нет.</p>
             </section>
           </fieldset>
