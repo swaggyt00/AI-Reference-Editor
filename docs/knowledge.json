@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": null,
+  "generated_at": "2026-10-21T21:00:08+00:00",
   "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
   "sources": [
     {
@@ -19,11 +19,17 @@
       "note": "Official transition API includes fade, slide, wipe, zoomBlur, crossZoom and filmBurn presentations. Requires the compatible @remotion/transitions package.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/transitions | Remotion",
+      "online_description": "This package provides the `` component for transitioning between two scenes as well as timing presets.",
+      "online_headings": [
+        "@remotion/transitions v 4.0.53",
+        "Installation ​",
+        "API ​",
+        "License ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:55+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-series",
@@ -40,11 +46,20 @@
       "note": "TransitionSeries overlaps adjacent scenes. Timing is measured in frames; overlap reduces combined duration.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Transitions | Remotion",
+      "online_description": "The ` component lets you animate between absolutely positioned scenes. Between any two sequences, you can place a or a `.",
+      "online_headings": [
+        "Transitions v 4.0.59",
+        "Transitions ​",
+        "Overlays v 4.0.415 ​",
+        "Presentations ​",
+        "Timings ​",
+        "Audio transitions ​",
+        "Rules ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:55+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-keyframes",
@@ -62,11 +77,20 @@
       "note": "Use interpolate with explicit frame points and clamp behavior for bounded motion.",
       "mode": "reference",
       "implementation": "implemented",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "interpolate() | Remotion",
+      "online_description": "Allows you to map a range of values to another using a concise syntax.",
+      "online_headings": [
+        "interpolate()",
+        "Example: Fade-in effect ​",
+        "Example: Fade in and out ​",
+        "Example: interpolate a spring animation ​",
+        "Example: Prevent the output from going outside the output range ​",
+        "Example: Scaling feels nonlinear? Use perceptual scale output v 4.0.490 ​",
+        "Example: CSS transform values v 4.0.472 ​",
+        "Example: Discrete string values v 4.0.509 ​"
+      ],
+      "checked_at": "2026-10-21T20:59:55+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-spring",
@@ -83,11 +107,18 @@
       "note": "Spring timing provides damped movement, useful only when observed in the reference.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "spring() | Remotion",
+      "online_description": "A physics-based animation primitive.",
+      "online_headings": [
+        "spring()",
+        "Parameters ​",
+        "Order of operations ​",
+        "Credit ​",
+        "Compatibility ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:56+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-captions",
@@ -104,11 +135,14 @@
       "note": "Captions require actual transcript timing or user-supplied subtitles; do not invent text.",
       "mode": "reels",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Captions | Remotion",
+      "online_description": "Learn how to add captions and subtitles to your Remotion videos.",
+      "online_headings": [
+        "Captions",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:56+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-tiktok",
@@ -124,11 +158,18 @@
       "note": "Token-page grouping creates TikTok-style caption timing; transcription is still required.",
       "mode": "reels",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "createTikTokStyleCaptions() | Remotion",
+      "online_description": "Using this function, you can segment tokens to create \"pages\" of captions, as commonly seen on TikTok videos.",
+      "online_headings": [
+        "createTikTokStyleCaptions() v 4.0.216",
+        "API ​",
+        "Return value ​",
+        "Whitespace sensitivity ​",
+        "Compatibility ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:56+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-audio",
@@ -144,11 +185,17 @@
       "note": "Audio visualizers use waveform/spectrum data. This does not automatically implement beat-synced cutting.",
       "mode": "reels",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Audio Visualization | Remotion",
+      "online_description": "Remotion has APIs for visualizing audio, for example for creating audiograms or music visualizers.",
+      "online_headings": [
+        "Audio Visualization",
+        "Bar visualization ​",
+        "Waveform visualization ​",
+        "Working with large files ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:56+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-audio-usage",
@@ -164,11 +211,14 @@
       "note": "Video audio volume and timing should keep dialog intelligible; assess clipping after mixing.",
       "mode": "reels",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Using audio | Remotion",
+      "online_description": "Remotion provides powerful capabilities for working with audio in your compositions.",
+      "online_headings": [
+        "Using audio",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T20:59:57+00:00",
+      "status": "ok"
     },
     {
       "id": "ffmpeg-filters",
@@ -191,7 +241,7 @@
       "online_description": null,
       "online_headings": [],
       "checked_at": null,
-      "status": "not_checked"
+      "status": "unavailable"
     },
     {
       "id": "opencv-flow",
@@ -207,11 +257,17 @@
       "note": "Optical flow estimates movement between images; not a full automatic object-aware compositor.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "OpenCV: Optical Flow",
+      "online_description": "",
+      "online_headings": [
+        "Goal",
+        "Optical Flow",
+        "Lucas-Kanade method",
+        "Lucas-Kanade Optical Flow in OpenCV",
+        "Dense Optical Flow in OpenCV"
+      ],
+      "checked_at": "2026-10-21T21:00:05+00:00",
+      "status": "ok"
     },
     {
       "id": "opencv-template",
@@ -227,11 +283,16 @@
       "note": "Template matching can localize known templates; limitations include scale and occlusion.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "OpenCV: Template Matching",
+      "online_description": "",
+      "online_headings": [
+        "Goals",
+        "Theory",
+        "Template Matching in OpenCV",
+        "Template Matching with Multiple Objects"
+      ],
+      "checked_at": "2026-10-21T21:00:06+00:00",
+      "status": "ok"
     },
     {
       "id": "gemini-video",
@@ -247,11 +308,20 @@
       "note": "Model video descriptions may miss short effects; keep pixel timing from local frame analysis.",
       "mode": "reference",
       "implementation": "implemented",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Video understanding | Gemini API | Google AI for Developers",
+      "online_description": "Get started building with Gemini&#39;s multimodal capabilities in the Gemini API",
+      "online_headings": [
+        "Video understanding",
+        "Agentic video understanding",
+        "Refer to timestamps in the content",
+        "Extract detailed insights from video",
+        "Customize video processing",
+        "Supported video formats",
+        "Technical details about videos",
+        "What's next"
+      ],
+      "checked_at": "2026-10-21T21:00:06+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-motionblur",
@@ -267,11 +337,17 @@
       "note": "HTML-in-canvas blur or camera motion blur can smooth graphic movement; not yet wired into this editor.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Motion blur | Remotion",
+      "online_description": "To realize a realistic motion blur, a frame needs to be duplicated multiple times and blended together.",
+      "online_headings": [
+        "Motion blur",
+        "Recommended: HTML-in-canvas motion blur ​",
+        "Camera motion blur ​",
+        "Trail ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T21:00:06+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-animated-marks",
@@ -288,11 +364,15 @@
       "note": "Transform helpers can build controlled kinetic typography and graphic motion.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/animation-utils | Remotion",
+      "online_description": "Functions that support you in animating CSS styles.",
+      "online_headings": [
+        "@remotion/animation-utils v 4.0.92",
+        "Functions ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-21T21:00:07+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-resources",
@@ -308,11 +388,20 @@
       "note": "Links to official guides, example projects and third-party tutorials; no videos are copied or retained.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "List of resources | Remotion",
+      "online_description": "This list tries to compile all templates, libraries, building blocks and examples in one place. Add more to the list by clicking the \"Improve this page\" button below!",
+      "online_headings": [
+        "List of resources",
+        "Templates ​",
+        "SaaS starter Kits ​",
+        "Integrations ​",
+        "Effects ​",
+        "Players ​",
+        "Animation helpers ​",
+        "Full projects ​"
+      ],
+      "checked_at": "2026-10-21T21:00:07+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-display-captions",
@@ -328,11 +417,20 @@
       "note": "Word highlighting and styled caption sequences require real aligned transcript tokens.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "Displaying captions | Remotion",
+      "online_description": "This guide explains how to display captions in Remotion, assuming you already have captions in the Caption format - see Transcribing audio for how to generate them.",
+      "online_headings": [
+        "Displaying captions",
+        "Fetching captions ​",
+        "Creating pages ​",
+        "Rendering with Sequences ​",
+        "Rendering a caption page ​",
+        "Full example ​",
+        "Next steps ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-21T21:00:07+00:00",
+      "status": "ok"
     },
     {
       "id": "opencv-background",
@@ -348,11 +446,17 @@
       "note": "Static-camera background subtraction can help some foreground masks; camera motion breaks assumptions.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "OpenCV: How to Use Background Subtraction Methods",
+      "online_description": "",
+      "online_headings": [
+        "Goals",
+        "Code",
+        "Explanation",
+        "Results",
+        "References"
+      ],
+      "checked_at": "2026-10-21T21:00:07+00:00",
+      "status": "ok"
     },
     {
       "id": "remotion-editor-features",
@@ -367,6 +471,83 @@
         "captions"
       ],
       "note": "Commercial editor starter functionality is not included in this open editor; useful as implementation research only.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": "Features in the Editor Starter | Remotion",
+      "online_description": "On this page, we list the features that are available in the Editor Starter.",
+      "online_headings": [
+        "Features in the Editor Starter",
+        "Feature flags ​",
+        "Item types ​",
+        "Action row ​",
+        "Timeline ​",
+        "Inspector ​",
+        "Playback ​",
+        "Canvas ​"
+      ],
+      "checked_at": "2026-10-21T21:00:08+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "discovered-captions-api",
+      "title": "Remotion documentation: captions api",
+      "url": "https://www.remotion.dev/docs/captions/api",
+      "tags": [
+        "captions",
+        "api"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-effects-api",
+      "title": "Remotion documentation: effects api",
+      "url": "https://www.remotion.dev/docs/effects/api",
+      "tags": [
+        "effects",
+        "api"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-fonts-api",
+      "title": "Remotion documentation: fonts api",
+      "url": "https://www.remotion.dev/docs/fonts-api",
+      "tags": [
+        "fonts",
+        "api"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-google-fonts",
+      "title": "Remotion documentation: google fonts",
+      "url": "https://www.remotion.dev/docs/google-fonts",
+      "tags": [
+        "google",
+        "fonts"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
       "online_title": null,
