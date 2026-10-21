@@ -69,6 +69,7 @@ class ProjectStore:
                 state = json.loads(path.read_text(encoding='utf-8'))
                 if state['id'] != path.parent.name or not re.fullmatch(r'[a-f0-9]{32}', state['id']):
                     continue
+                state.setdefault('music', None)
                 self.projects[state['id']] = state
                 changed = False
                 for run in state['renders']:
@@ -100,7 +101,7 @@ class ProjectStore:
 
     def create(self):
         with self.lock:
-            state = {'id': uuid4().hex, 'reference': None, 'sources': [], 'renders': []}
+            state = {'id': uuid4().hex, 'reference': None, 'music': None, 'sources': [], 'renders': []}
             self.projects[state['id']] = state
             self.save(state)
             return deepcopy(state)
@@ -122,8 +123,14 @@ class ProjectStore:
             state = self.projects[pid]
             if self.busy(pid) or pid in self.uploading:
                 raise ValueError('Дождитесь завершения текущей загрузки или рендера.')
-            if not state['reference'] or not state['sources']:
+            editor_mode = settings.get('editor_mode', 'reference')
+            if editor_mode == 'reference' and (not state['reference'] or not state['sources']):
                 raise ValueError('Загрузите референс и хотя бы один исходник.')
+            if editor_mode == 'smart_reels':
+                if not state['sources']:
+                    raise ValueError('Загрузите длинный исходный ролик.')
+                if not settings.get('ai_semantic'):
+                    raise ValueError('Smart Reels требует включить и подтвердить Gemini AI-анализ.')
             settings, warnings = resolve_settings(settings)
             ids = settings.get('source_ids')
             assets = {s['id']: s for s in state['sources']}
@@ -132,7 +139,13 @@ class ProjectStore:
             if not ids or len(ids) != len(set(ids)) or any(i not in assets for i in ids):
                 raise ValueError('Выберите загруженные исходники без повторений.')
             settings['source_ids'] = ids
-            if settings.get('ai_semantic'):
+            if editor_mode == 'smart_reels':
+                if len(ids) != 1:
+                    raise ValueError('Smart Reels пока принимает один длинный исходник.')
+                duration = assets[ids[0]]['metadata']['duration']
+                if duration < 15 or duration > 1800:
+                    raise ValueError('Smart Reels принимает видео длительностью от 15 секунд до 30 минут.')
+            if settings.get('ai_semantic') and editor_mode == 'reference':
                 if len(ids) > 3:
                     raise ValueError('Первый AI-режим поддерживает до 3 исходников за один запуск.')
                 selected = [state['reference'], *(assets[i] for i in ids)]
@@ -149,7 +162,8 @@ class ProjectStore:
             state['renders'].append(run)
             self.save(state)
             self.executor.submit(self.process, pid, rid, deepcopy(state['reference']),
-                                 [deepcopy(assets[i]) for i in ids], deepcopy(settings))
+                                 [deepcopy(assets[i]) for i in ids], deepcopy(settings),
+                                 deepcopy(state.get('music')))
             return deepcopy(run)
 
     def update(self, pid, rid, **values):
@@ -161,11 +175,59 @@ class ProjectStore:
             run.update(values)
             self.save(state)
 
-    def process(self, pid, rid, reference, sources, settings):
+    def process_reels(self, pid, rid, sources, settings, music=None):
+        """One local video, AI-planned highlights; no external footage rendering."""
+        from .smart_reels import propose_highlights, render_reels, ffprobe_media
+        from .qa import contact_sheet
+        from .ai_gemini import safe_error_reason
+        src = self.media_path(pid, sources[0])
+        audio = self.media_path(pid, music) if music else None
+        folder = self.directory(pid) / 'renders' / rid
+        folder.mkdir(parents=True, exist_ok=True)
+        try:
+            self.update(pid, rid, status='running', stage='Gemini: анализ длинного видео', progress=3)
+            proposal = propose_highlights(
+                src, settings.get('reel_seconds', 60), settings.get('brief', '')
+            )
+            proposal['brief'] = settings.get('brief', '')
+            proposal['music'] = music['name'] if music else None
+            write_project(proposal, folder / 'project.json')
+            self.update(pid, rid, stage='Монтаж лучших моментов', progress=42)
+            video = render_reels(
+                proposal, folder / 'final.mp4', music=audio,
+                progress=lambda progress, stage: self.update(
+                    pid, rid, progress=progress, stage=stage)
+            )
+            self.update(pid, rid, stage='Проверка экспорта', progress=93)
+            meta = ffprobe_media(video)
+            report = {
+                'resolution': '720x1280', 'duration_s': round(meta['duration'], 2),
+                'audio_present': meta['audio'], 'highlights': len(proposal['clips']),
+                'model': proposal['model'],
+                'warnings': list(proposal.get('warnings', [])) + [
+                    'Gemini highlights are approximate; manually review dialogue cuts and meaning.',
+                    'Vertical framing is center crop; person tracking is not implemented.'
+                ]
+            }
+            (folder / 'qa_report.json').write_text(
+                json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8'
+            )
+            contact_sheet(src, video, folder / 'comparison.jpg')
+            self.update(pid, rid, status='completed', stage='Готово', progress=100,
+                        warnings=report['warnings'])
+        except Exception as exc:
+            LOG.exception('Smart Reels render failed: %s/%s', pid, rid)
+            reason = str(exc) if isinstance(exc, ValueError) else safe_error_reason(exc)
+            self.update(pid, rid, status='failed', stage='Ошибка Smart Reels',
+                        error='Smart Reels: ' + reason)
+
+    def process(self, pid, rid, reference, sources, settings, music=None):
         directory = self.directory(pid)
         out = directory / 'renders' / rid
         out.mkdir(parents=True, exist_ok=True)
         try:
+            if settings.get('editor_mode') == 'smart_reels':
+                return self.process_reels(pid, rid, sources, settings, music)
             self.update(pid, rid, status='running', stage='Анализ референса', progress=1)
             cache = directory / ('analysis-' + reference['id'] + '.json')
             try:
