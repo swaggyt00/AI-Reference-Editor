@@ -161,7 +161,24 @@ Respond with a JSON object containing ONLY:
 {"matches": [{"shot_index":0,"source_index":0,"source_start_s":0.0,
              "confidence":0.85,"reason":"short description"}],
  "observed_effects": ["effects visible in reference, only if evidenced"],
+ "motion_layers": [
+   {"kind":"title", "start":1.2, "end":2.7, "text":"EXACT TEXT VISIBLE",
+    "x":0.5, "y":0.27, "size":72, "animation":"rise", "confidence":0.91}
+ ],
  "limitations": ["what can't be reproduced with the supplied footage"]}.
+Motion layers must accurately reconstruct ACTUALLY VISIBLE OVERLAYS ONLY:
+- kinds: title, caption, card, badge, route. Never add generic marketing text.
+- text: exact visible wording from reference, omit uncertain or unreadable text.
+- start/end: actual overlay appearance as best estimated from visual evidence.
+- route: only when an actual graphic route is visible. Provide 2-12 normalized
+  "points": [[0.2,0.8],[0.5,0.3]] tracing the reference graphic. DO NOT
+  fabricate map geography or travel coordinates; abstract diagram only.
+- x and y: position of layer CENTER normalized between 0 and 1.
+- animation: fade, rise, slide or pop only if corresponding movement is visible.
+- confidence: use below 0.72 when uncertain, so it will not render.
+- never describe UI screenshots, people, or video B-roll as text overlays.
+- do not fabricate image or video media assets. They must be supplied separately.
+
 The matching confidence is between 0 and 1, under 0.65 means uncertain.
 Do not suggest adding generic flashy transitions when absent in the reference.
 DATA: """ + json.dumps(context, ensure_ascii=False)
@@ -191,6 +208,20 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
         "limitations": limitations[:25] if isinstance(limitations, list) else [],
         "effect_execution": "NOT enabled: observations require frame-accurate validation"
     }
+    # Keep only supported, bounded, high-confidence graphics; low-confidence
+    # Gemini observations never cause accidental decorative overlays.
+    if project.get("motion_design"):
+        from .motion import validate_motion_layers
+        graphics = validate_motion_layers(
+            proposed.get("motion_layers", []), project["duration"]
+        )
+        project["motion_layers"] = graphics
+        plan["motion_layers_validated"] = len(graphics)
+        if not graphics:
+            project["warnings"].append(
+                "Gemini found no confident reproducible text/route overlays. "
+                "No generic motion graphics will be invented."
+            )
     project["ai_scene_plan"] = plan
     if not applied:
         project["warnings"].append(
