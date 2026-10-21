@@ -24,6 +24,7 @@ function settings() {
     editor_mode: $('editor-mode').value, reel_seconds: Number($('reel-seconds').value || 60),
     align_audio: $('align-audio').checked, ai_semantic: $('ai-semantic').checked,
     motion_design: $('motion-design').checked,
+    gemini_model: $('gemini-model').value,
     max_seconds: $('duration').value ? Number($('duration').value) : null,
     source_ids: sources.filter(s => s.id).map(s => s.id)};
 }
@@ -283,10 +284,11 @@ $('editor-form').addEventListener('submit', async event => {
   if ($('ai-semantic').checked) {
     if (!reel && sources.length > 3) { message('Reference Clone AI поддерживает максимум 3 исходника.'); return; }
     const motionWarning = $('motion-design').checked ? ' ВКЛЮЧЁН Motion Design: помимо видео, Google получит до 3 обзорных листов с кадрами и таймкодами. Возможен расход API-квоты. Простая графика с подходящим фоном будет восстановлена; сложные эффекты не гарантируются. Требуется setup-motion.cmd.' : '';
+    const modelWarning = ' Выбранная модель: ' + $('gemini-model').value + '. При 503 возможен один дополнительный повтор; переключение на другую модель только вручную. Доступность и тарификация зависят от аккаунта Google.';
     const disclaimer = reel
       ? 'Отправить сжатую копию длинного ролика со звуком в Google Gemini? Понадобится API-квота. Gemini выберет интересные моменты, но может ошибиться. Финальный монтаж выполняется на ПК.'
       : 'Отправить сжатые копии референса и исходников в Google Gemini для анализа? Понадобится API-квота. Сложные VFX пока воспроизводятся только частично.';
-    if (!window.confirm(disclaimer + motionWarning)) return;
+    if (!window.confirm(disclaimer + motionWarning + modelWarning)) return;
   }
   setBusy(true);
   try {
@@ -327,13 +329,14 @@ function updateHints() {
   $('brief-mode-hint').textContent = smart
     ? 'Gemini учитывает вашу задачу при выборе лучших моментов и монтаже короткого Reels.'
     : 'В Reference Clone свободная задача — подсказка Gemini, точное выполнение сложных указаний не гарантируется.';
+  $('gemini-model-field').hidden = !$('ai-semantic').checked && !smart;
   $('ai-consent-hint').textContent = smart
     ? 'Для Smart Reels требуется Gemini: сжатая копия со звуком отправляется в Google с вашего согласия. Ролики до 30 минут. Не гарантируется идеальный выбор моментов.'
     : 'Gemini отправляются сжатые копии видео со звуком; в Motion Design ещё и обзорные кадры референса — только с вашего согласия. До 3 исходников и 60 секунд на видео. Сложные эффекты воспроизводятся частично.';
   $('mode-hint').textContent = $('mode').value === 'fit' ? 'Fit меняет скорость исходников под длину сцен референса.' : 'Native сохраняет скорость; если исходник короче сцены, последний кадр удерживается.';
   $('audio-hint').hidden = $('audio').value === 'none';
 }
-['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic', 'motion-design'].forEach(id =>
+['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic', 'motion-design', 'gemini-model'].forEach(id =>
   $(id).addEventListener('input', () => {updateHints(); saveDraft();}));
 async function loadProjectLibrary() {
   const list = await api('/api/projects');
@@ -458,6 +461,7 @@ async function init() {
         $('reel-seconds').value = options.reel_seconds || 60;
         $('ai-semantic').checked = options.ai_semantic || false;
         $('motion-design').checked = options.motion_design || false;
+        $('gemini-model').value = options.gemini_model || 'gemini-3.6-flash';
         if (Array.isArray(options.source_ids)) sources = options.source_ids.map(id => state.sources.find(s => s.id === id)).filter(Boolean);
       }
       saveProject(); renderFiles(); updateHints(); updateRunState(state);

@@ -116,6 +116,18 @@ class WebTests(unittest.TestCase):
             self.assertEqual(len(restarted.get(self.url).json()['renders']), 2)
             self.assertEqual(restarted.get(second['video_url']).status_code, 200)
 
+    def test_selected_ai_model_reaches_director_without_real_gemini_request(self):
+        self.prepare()
+        with patch('refeditor.ai_director.run_ai_scene_matching') as director:
+            run=self.render(ai_semantic=True, gemini_model='gemini-3.8-flash',
+                            brief='preserve existing timings')
+        self.assertEqual(run['settings']['gemini_model'],'gemini-3.8-flash')
+        self.assertEqual(director.call_count,1)
+        self.assertEqual(director.call_args.kwargs['model'],'gemini-3.8-flash')
+        response=self.client.post(self.url+'/renders',
+            json={'ai_semantic':True,'gemini_model':'unknown-model'})
+        self.assertEqual(response.status_code,422,response.text)
+
     def test_reject_invalid_media_missing_inputs_and_bad_settings(self):
         self.assertEqual(self.client.post(self.url + '/renders', json={}).status_code, 400)
         bad = self.client.post(self.url + '/media', params={'role': 'reference', 'name': 'video.mp4'}, content=b'not a video')

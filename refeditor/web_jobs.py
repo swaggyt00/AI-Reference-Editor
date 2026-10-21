@@ -266,7 +266,8 @@ class ProjectStore:
         try:
             self.update(pid, rid, status='running', stage='Gemini: анализ длинного видео', progress=3)
             proposal = propose_highlights(
-                src, settings.get('reel_seconds', 60), settings.get('brief', '')
+                src, settings.get('reel_seconds', 60), settings.get('brief', ''),
+                model=settings.get('gemini_model', 'gemini-3.6-flash')
             )
             proposal['brief'] = settings.get('brief', '')
             proposal['music'] = music['name'] if music else None
@@ -332,7 +333,7 @@ class ProjectStore:
                     [self.media_path(pid, asset) for asset in sources],
                     directory / 'ai-cache',
                     graphics_dir=out / 'graphic-assets' if settings.get('motion_design') else None,
-                    model=DEFAULT_MODEL,
+                    model=settings.get('gemini_model', DEFAULT_MODEL),
                     progress=lambda stage, p: self.update(pid, rid, stage=stage, progress=p)
                 )
             # Duration is an explicit end trim, not a fabricated new pacing model.
