@@ -41,6 +41,22 @@ const ImageGraphic=({item})=>{
       borderRadius:item.radius??16,filter:'drop-shadow(0 12px 20px #0006)'}}/>
   </div>;
 };
+const VideoGraphic=({item})=>{
+  const frame=useCurrentFrame(),{fps}=useVideoConfig(),anim=animated(item,frame,fps);
+  if(!anim)return null;
+  const begin=Math.round(item.start*fps);
+  const duration=Math.max(1,Math.round((item.end-item.start)*fps));
+  // Sequence resets local time, so the insert begins at the requested media moment.
+  const localFrame=frame-begin;
+  return <div style={{...placement(item),...anim,width:(item.width??.8)*100+'%',
+    height:(item.height??.32)*100+'%',borderRadius:18,overflow:'hidden',
+    border:'3px solid #ffffffaa',boxShadow:'0 18px 35px #0009'}}>
+    <OffthreadVideo src={staticFile('assets/'+item.asset)} volume={0}
+      startFrom={Math.round((item.source_start??0)*fps)}
+      endAt={Math.round((item.source_start??0)*fps)+duration}
+      style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+  </div>;
+};
 const RouteGraphic=({item})=>{
   const frame=useCurrentFrame(),{fps}=useVideoConfig(),anim=animated(item,frame,fps);
   if(!anim)return null;
@@ -68,6 +84,7 @@ export const MotionComposition=({baseFile,layers=[]})=><AbsoluteFill style={{bac
   {baseFile?<OffthreadVideo src={staticFile('assets/'+baseFile)}
     style={{width:'100%',height:'100%',objectFit:'cover'}} volume={0}/>:null}
   {layers.map((item,i)=>item.kind==='image'?<ImageGraphic item={item} key={i}/>:
+     item.kind==='video'?<VideoGraphic item={item} key={i}/>:
      item.kind==='route'?<RouteGraphic item={item} key={i}/>:
      <TextGraphic item={item} key={i}/>)}
 </AbsoluteFill>;
