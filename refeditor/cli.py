@@ -21,6 +21,7 @@ def main(argv=None):
     commands.add_parser('doctor',help='Check Python dependencies and FFmpeg')
     ck=commands.add_parser('ai-check',help='Test locally saved Gemini API key (one small API call)')
     ck.add_argument('--model',default='gemini-3.8-flash')
+    ck.add_argument('--local-only',action='store_true',help='Check key decryption without a network API request')
     av=commands.add_parser('ai-analyze',help='Opt-in Gemini semantic notes for one supplied video')
     av.add_argument('--video',required=True)
     av.add_argument('--role',choices=['reference','source'],default='reference')
@@ -34,11 +35,18 @@ def main(argv=None):
     w.add_argument('--max-upload-mb',type=int,default=2048)
     args=ap.parse_args(argv)
     if args.command in ('ai-check','ai-analyze'):
-        from .ai_gemini import check_connection, analyze_video as ai_analyze
+        from .ai_gemini import check_connection, check_local_setup, analyze_video as ai_analyze
         try:
             if args.command == 'ai-check':
-                result = check_connection(model=args.model)
-                print('Gemini connected:',result['model'],'—',result['response'])
+                if args.local_only:
+                    result = check_local_setup()
+                    print('LOCAL GEMINI KEY: OK. Decryption and SDK check passed; no API request made.')
+                else:
+                    print('Gemini local key and SDK check...',flush=True)
+                    check_local_setup()
+                    print('Gemini API request...',flush=True)
+                    result = check_connection(model=args.model)
+                    print('Gemini connected:',result['model'],'—',result['response'])
             else:
                 target = ai_analyze(args.video,args.output,role=args.role,
                                     model=args.model,
@@ -46,8 +54,9 @@ def main(argv=None):
                 print('Gemini semantic notes saved:',target)
             return 0
         except Exception as exc:
-            # Never print SDK internals which might include URLs or sensitive headers.
-            print('Gemini request failed:',type(exc).__name__,file=sys.stderr)
+            # Never print raw SDK errors that can contain request metadata.
+            from .ai_gemini import safe_error_reason
+            print('Gemini check failed:',safe_error_reason(exc),file=sys.stderr)
             return 2
     if args.command=='web':
         if args.max_upload_mb < 1:ap.error('--max-upload-mb must be positive')
