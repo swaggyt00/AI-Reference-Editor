@@ -13,7 +13,8 @@ function message(text) { $('error').textContent = text; $('error').hidden = !tex
 function size(bytes) { return bytes >= 1024 ** 3 ? `${(bytes / 1024 ** 3).toFixed(1)} ГБ` : bytes >= 1024 ** 2 ? `${(bytes / 1024 ** 2).toFixed(1)} МБ` : `${Math.ceil(bytes / 1024)} КБ`; }
 function settings() {
   return {brief: $('brief').value, mode: $('mode').value, audio: $('audio').value,
-    align_audio: $('align-audio').checked, max_seconds: $('duration').value ? Number($('duration').value) : null,
+    align_audio: $('align-audio').checked, ai_semantic: $('ai-semantic').checked,
+    max_seconds: $('duration').value ? Number($('duration').value) : null,
     source_ids: sources.filter(s => s.id).map(s => s.id)};
 }
 function saveDraft() {
@@ -213,6 +214,10 @@ $('editor-form').addEventListener('submit', async event => {
   event.preventDefault(); if (busy) return;
   message('');
   if (!reference || !sources.length) { message('Выберите референс и хотя бы один исходник.'); return; }
+  if ($('ai-semantic').checked) {
+    if (sources.length > 3) { message('Экспериментальный AI-режим поддерживает максимум 3 исходника.'); return; }
+    if (!window.confirm('Отправить сжатые копии выбранных видео и звука в Google Gemini для анализа? Возможен расход бесплатной API-квоты. Ключ останется на ПК. Это пока AI-подбор сцен, НЕ копирование сложных VFX.')) return;
+  }
   setBusy(true);
   try {
     if (!projectId) { const state = await api('/api/projects', {method: 'POST'}); projectId = state.id; saveProject(); }
