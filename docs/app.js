@@ -50,6 +50,7 @@ function setBusy(value) {
   $('editor-fields').disabled = value;
   $('new-project').disabled = value;
   $('delete-project').disabled = value;
+  $('manage-projects').disabled = value;
   $('run').disabled = value || !ready;
   if (value) $('run').textContent = 'Обработка…';
   else $('run').textContent = runs.length ? '↻ Повторить рендер' : '▶ Анализировать и смонтировать ↗';
@@ -334,6 +335,68 @@ function updateHints() {
 }
 ['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic', 'motion-design'].forEach(id =>
   $(id).addEventListener('input', () => {updateHints(); saveDraft();}));
+async function loadProjectLibrary() {
+  const list = await api('/api/projects');
+  $('project-library').replaceChildren();
+  if (!list.length) {
+    const blank = document.createElement('p');
+    blank.className = 'hint'; blank.textContent = 'На этом ПК пока нет сохранённых проектов.';
+    $('project-library').append(blank);
+    return;
+  }
+  for (const item of list) {
+    const row = document.createElement('div'); row.className = 'project-row';
+    const label = document.createElement('div'); label.className = 'project-label';
+    const title = document.createElement('strong');
+    title.textContent = item.reference_name || 'Проект без референса';
+    const subtitle = document.createElement('small');
+    subtitle.textContent = [
+      item.sources + ' исходников', item.renders + ' версий',
+      size(item.uploaded_bytes) + ' исходных файлов',
+      new Date(item.updated * 1000).toLocaleString('ru-RU'),
+      item.id === projectId ? 'Текущий проект' : ''
+    ].filter(Boolean).join(' · ');
+    label.append(title, subtitle);
+    const actions = document.createElement('div'); actions.className = 'project-actions';
+    const open = button('Открыть', 'Открыть проект', () => {
+      if (busy || item.id === projectId) return;
+      storage.set('refeditor-project', item.id);
+      location.hash = '#' + item.id;
+      location.reload();
+    }, busy || item.id === projectId);
+    open.className = 'button';
+    const remove = button('🗑 Удалить', 'Удалить проект безвозвратно', async () => {
+      if (busy || item.busy) return;
+      if (!window.confirm('Удалить ВЕСЬ проект «' + (item.reference_name || item.id.slice(0, 8)) +
+        '» навсегда? Все исходники, референсы и MP4 этого проекта будут удалены с ПК.')) return;
+      setBusy(true); message('');
+      try {
+        await api('/api/projects/' + item.id, {method:'DELETE'});
+        if (item.id === projectId) resetWorkspace();
+        await loadProjectLibrary();
+        message('Проект безвозвратно удалён с ПК.');
+      } catch (error) {
+        message('Ошибка удаления проекта: ' + error.message);
+      } finally {
+        setBusy(false);
+      }
+    }, busy || item.busy);
+    remove.className = 'button danger';
+    actions.append(open,remove); row.append(label,actions);
+    $('project-library').append(row);
+  }
+}
+$('manage-projects').addEventListener('click', async () => {
+  if (busy) return;
+  $('project-manager').hidden = !$('project-manager').hidden;
+  if (!$('project-manager').hidden) {
+    try { await loadProjectLibrary(); }
+    catch (error) { message('Не удалось загрузить список проектов: ' + error.message); }
+  }
+});
+$('close-project-manager').addEventListener('click', () => {
+  $('project-manager').hidden = true;
+});
 function resetWorkspace() {
   const previous = projectId;
   clearTimeout(pollTimer);
