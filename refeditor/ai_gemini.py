@@ -13,7 +13,7 @@ import subprocess
 import tempfile
 import time
 
-DEFAULT_MODEL = "gemini-3.6-flash"
+from .ai_resilience import DEFAULT_MODEL, call_with_overload_retry, status_code
 
 def safe_error_reason(exc):
     """Render safe actionable error text. Never include API keys or request bodies."""
@@ -35,8 +35,7 @@ def safe_error_reason(exc):
         return "Windows cannot decrypt the saved key. Please run configure-gemini.cmd under the same Windows account."
     if message.startswith("Optional Gemini dependency is missing."):
         return "Google Gemini SDK is missing. Run configure-gemini.cmd."
-    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
-    status = str(status)
+    status = str(status_code(exc))
     if status == "400":
         return "HTTP 400: Google rejected the API request. Check model settings and compatibility."
     if status == "401":
@@ -48,7 +47,9 @@ def safe_error_reason(exc):
     if status == "429":
         return "HTTP 429: Free-tier quota or rate limit reached. Check AI Studio limits."
     if status.startswith("5") and len(status) == 3:
-        return "Gemini API server error (HTTP " + status + "). Try again later."
+        return ("Google Gemini temporarily unavailable (HTTP " + status +
+                "). SDK and app retries exhausted. Re-run this project or "
+                "select another model in Gemini settings; completed analysis is cached.")
     if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
         return "Network/TLS error. Check internet, VPN, proxy, and Windows certificate settings."
     return "Unexpected error (" + type(exc).__name__ + "). Check the local key first using ai-check --local-only."
@@ -145,7 +146,7 @@ def _encode_preview(source: Path, target: Path):
 
 
 def analyze_video(video, output, *, role="reference", model=DEFAULT_MODEL,
-                  confirm_external_upload=False):
+                  confirm_external_upload=False, on_retry=None):
     """Semantic notes for later use by editing agents.
 
     Does NOT alter project timing, source order or effects automatically.
@@ -188,9 +189,11 @@ You must separate native camera/actor movement from post-production effects.
 If unsure, say unknown, do not invent effects or scenes.
 Timestamps and effect candidates are approximations, NOT frame-accurate measurements.
 Do not propose effects absent from the actual video."""
-            response = client.models.generate_content(
-                model=model, contents=[remote_file, prompt],
-                config={"response_mime_type": "application/json", "temperature": 0.1}
+            response = call_with_overload_retry(
+                lambda: client.models.generate_content(
+                    model=model, contents=[remote_file, prompt],
+                    config={"response_mime_type": "application/json", "temperature": 0.1}
+                ), on_retry=on_retry
             )
             if not response.text:
                 raise RuntimeError("Gemini returned an empty analysis.")
