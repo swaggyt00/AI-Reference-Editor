@@ -27,6 +27,7 @@ class RenderSettings(BaseModel):
     mode: Literal['fit', 'native'] = 'fit'
     audio: Literal['none', 'reference', 'source'] = 'none'
     align_audio: bool = False
+    ai_semantic: bool = False  # Explicit opt-in for sending video proxies to Google Gemini
     max_seconds: float | None = Field(default=None, ge=.1, le=3600)
     source_ids: list[str] | None = Field(default=None, max_length=32)
 
