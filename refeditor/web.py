@@ -30,6 +30,8 @@ class RenderSettings(BaseModel):
     ai_semantic: bool = False  # Explicit opt-in for sending video proxies to Google Gemini
     max_seconds: float | None = Field(default=None, ge=.1, le=3600)
     source_ids: list[str] | None = Field(default=None, max_length=32)
+    editor_mode: Literal['reference','smart_reels'] = 'reference'
+    reel_seconds: int = Field(default=60, ge=10, le=90)
 
 
 def validate_video(path):
@@ -55,6 +57,24 @@ def validate_video(path):
     finally:
         cap.release()
     return meta
+
+
+def validate_music(path):
+    """Verify that an uploaded audio file decodes with ffprobe, not by extension."""
+    result = subprocess.run(
+        ['ffprobe','-v','error','-protocol_whitelist','file,pipe',
+         '-show_format','-show_streams','-of','json',str(path)],
+        capture_output=True, timeout=30
+    )
+    if result.returncode:
+        raise ValueError('Не удалось прочитать аудиофайл.')
+    data = json.loads(result.stdout)
+    if not any(x.get('codec_type') == 'audio' for x in data.get('streams', [])):
+        raise ValueError('Для музыки нужен аудиофайл MP3, WAV, AAC или аналогичный формат.')
+    duration = float(data.get('format',{}).get('duration',0))
+    if not 1 <= duration <= 7200:
+        raise ValueError('Музыка должна длиться от 1 секунды до 2 часов.')
+    return {'duration': duration}
 
 
 def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_project_bytes=10 * 1024**3):
@@ -135,7 +155,7 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
         return store.get(pid)
 
     @app.post('/api/projects/{pid}/media', status_code=201)
-    async def upload(pid: str, request: Request, role: Literal['reference', 'source'],
+    async def upload(pid: str, request: Request, role: Literal['reference', 'source', 'music'],
                      name: str = Query(min_length=1, max_length=255),
                      upload_id: str | None = Query(default=None, pattern=r'^[a-f0-9]{32}$')):
         safe_name = name.replace('\\', '/').rsplit('/', 1)[-1]
@@ -148,10 +168,11 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
             directory = store.directory(pid)
             state = store.projects[pid]
             if upload_id:
-                candidates = ([state['reference']] if state['reference'] else []) + state['sources']
+                candidates = ([state['reference']] if state['reference'] else []) + state['sources'] + ([state.get('music')] if state.get('music') else [])
                 previous = next((s for s in candidates if s['id'] == upload_id), None)
                 if previous:
                     if ((previous == state['reference']) != (role == 'reference')
+                        or (previous == state.get('music')) != (role == 'music')
                         or previous['name'] != safe_name or declared not in (0, previous['size'])):
                         raise HTTPException(409, 'Идентификатор загрузки уже используется другим файлом.')
                     return previous
@@ -159,9 +180,13 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
                 raise HTTPException(409, 'Дождитесь завершения текущей операции.')
             if role == 'reference' and state['reference']:
                 raise HTTPException(409, 'Для другого референса создайте новый проект.')
+            if role == 'music' and state.get('music'):
+                raise HTTPException(409, 'Для другой музыки создайте новый проект.')
             if len(state['sources']) >= 32 and role == 'source':
                 raise HTTPException(400, 'Максимум 32 исходника в проекте.')
-            used = sum(s['size'] for s in state['sources']) + (state['reference'] or {}).get('size', 0)
+            used = (sum(s['size'] for s in state['sources']) +
+                    (state['reference'] or {}).get('size', 0) +
+                    (state.get('music') or {}).get('size', 0))
             limit = min(max_upload_bytes, max_project_bytes - used)
             if declared > limit:
                 raise HTTPException(413, 'Файл превышает лимит загрузки или свободный лимит проекта.')
@@ -180,7 +205,9 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
                         raise HTTPException(413, 'Файл превышает лимит загрузки или проекта.')
                     await run_in_threadpool(handle.write, chunk)
             try:
-                metadata = await run_in_threadpool(validate_video, part)
+                metadata = await run_in_threadpool(
+                    validate_music if role == 'music' else validate_video, part
+                )
             except (ValueError, RuntimeError, subprocess.TimeoutExpired, OSError) as exc:
                 raise HTTPException(422, 'Файл не является поддерживаемым видео. ' +
                                     (str(exc) if isinstance(exc, ValueError) else 'Проверьте формат и целостность файла.')) from exc
@@ -189,6 +216,8 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
                 part.replace(final)
                 if role == 'reference':
                     state['reference'] = asset
+                elif role == 'music':
+                    state['music'] = asset
                 else:
                     state['sources'].append(asset)
                 store.save(state)

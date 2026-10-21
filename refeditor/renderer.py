@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 from .analyzer import video_metadata
 from .effects import apply as apply_effects, source_curve
+from .transfer_fx import apply_white_panels, apply_reference_flash
 
 
 class SourceReader:
@@ -60,6 +61,9 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None,*,progres
         frames=min(frames,int(round(max_seconds*fps)))
     if frames <1:raise ValueError('Nothing to render')
     readers=[SourceReader(p) for p in project['source_files']]
+    whites=project['reference_analysis'].get('white_edge_masks', [])
+    reference_reader=(SourceReader(project['reference'])
+                      if any(b[0] > .001 or b[1] < .999 for b in whites) else None)
     raw=output.parent/(output.stem+'.silent.tmp.mp4')
     log_path=output.parent/(output.stem+'.ffmpeg.log')
     commands=['ffmpeg','-y','-hide_banner','-loglevel','error',
@@ -90,6 +94,11 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None,*,progres
                 frame=apply_effects(frame,t,project.get('effects',[]),i)
                 bounds=project['reference_analysis']['edge_masks'][i]
                 frame=effect_mask(frame,bounds)
+                if i < len(whites) and reference_reader is not None:
+                    ref_frame=reference_reader.frame(t)
+                    frame=apply_white_panels(frame, whites[i], ref_frame)
+                if project.get('transfer_ref_flashes', True):
+                    frame=apply_reference_flash(frame, i, project['reference_analysis'].get('flash_events', []))
                 try:pipe.stdin.write(frame.tobytes())
                 except BrokenPipeError:
                     break
@@ -115,6 +124,8 @@ def stream_render(project,output,crf=19,preset='fast',max_seconds=None,*,progres
             raw.replace(output)
     finally:
         for reader in readers:reader.close()
+        if reference_reader is not None:
+            reference_reader.close()
         if pipe is not None and pipe.poll() is None:
             pipe.kill()
             pipe.wait()
