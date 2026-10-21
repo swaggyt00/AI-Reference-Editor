@@ -32,6 +32,7 @@ function saveDraft() {
 }
 function saveProject() {
   storage.set('refeditor-project', projectId);
+  $('delete-project').hidden = false;
   history.replaceState(null, '', `#${projectId}`);
   saveDraft();
 }
@@ -48,6 +49,7 @@ function setBusy(value) {
   busy = value;
   $('editor-fields').disabled = value;
   $('new-project').disabled = value;
+  $('delete-project').disabled = value;
   $('run').disabled = value || !ready;
   if (value) $('run').textContent = 'Обработка…';
   else $('run').textContent = runs.length ? '↻ Повторить рендер' : '▶ Анализировать и смонтировать ↗';
@@ -66,9 +68,36 @@ function button(text, label, handler, disabled = false) {
   element.setAttribute('aria-label', label); element.title = label; element.disabled = disabled;
   element.addEventListener('click', handler); return element;
 }
-function fileRow(asset, index = null) {
-  const row = document.createElement(index === null ? 'div' : 'li'); row.className = 'file-row';
-  const icon = document.createElement('span'); icon.className = 'file-icon'; icon.textContent = index === null ? 'REF' : String(index + 1).padStart(2, '0');
+async function deleteUploaded(asset, role) {
+  if (busy || !asset) return;
+  if (!asset.id) {
+    if (role === 'reference') reference = null;
+    else if (role === 'music') music = null;
+    else sources = sources.filter(s => s !== asset);
+    renderFiles(); saveDraft(); return;
+  }
+  if (!window.confirm('Безвозвратно удалить загруженный файл «' + asset.name +
+    '» с этого ПК? Готовые MP4 и версии монтажа останутся. Для удаления ВСЕГО нажми «Удалить проект».')) return;
+  setBusy(true); message('');
+  try {
+    const state = await api('/api/projects/' + projectId + '/media/' + asset.id, {method:'DELETE'});
+    if (role === 'reference') reference = null;
+    else if (role === 'music') music = null;
+    else sources = sources.filter(s => s.id !== asset.id);
+    library = state.sources;
+    renderFiles(); saveDraft();
+    message('Файл «' + asset.name + '» удалён с ПК. Готовые рендеры сохранены.');
+  } catch (error) {
+    message('Не удалось удалить файл: ' + error.message);
+  } finally {
+    setBusy(false);
+  }
+}
+function fileRow(asset, index = null, role = 'source') {
+  const selectedSource = role === 'source';
+  const row = document.createElement(selectedSource ? 'li' : 'div'); row.className = 'file-row';
+  const icon = document.createElement('span'); icon.className = 'file-icon';
+  icon.textContent = role === 'reference' ? 'REF' : index === null ? 'SRC' : String(index + 1).padStart(2, '0');
   const description = document.createElement('div'); description.className = 'file-description';
   const name = document.createElement('div'); name.className = 'file-name'; name.textContent = asset.name; name.title = asset.name;
   const meta = document.createElement('div'); meta.className = 'file-meta';
@@ -76,34 +105,45 @@ function fileRow(asset, index = null) {
   if (asset.metadata) meta.textContent += ` · ${asset.metadata.duration.toFixed(1)} с`;
   description.append(name, meta); row.append(icon, description);
   const actions = document.createElement('div'); actions.className = 'file-actions';
-  if (index !== null) {
+  if (selectedSource) {
     actions.append(button('↑', `Поднять ${asset.name}`, () => {
       [sources[index - 1], sources[index]] = [sources[index], sources[index - 1]]; renderFiles(); saveDraft();
     }, index === 0));
     actions.append(button('↓', `Опустить ${asset.name}`, () => {
       [sources[index + 1], sources[index]] = [sources[index], sources[index + 1]]; renderFiles(); saveDraft();
     }, index === sources.length - 1));
-    actions.append(button('×', `Убрать из монтажа ${asset.name}`, () => {sources.splice(index, 1); renderFiles(); saveDraft();}));
-  } else if (!asset.id) {
-    actions.append(button('×', 'Убрать референс', () => { reference = null; renderFiles(); }));
+    actions.append(button('−', `Убрать из монтажа, оставить на ПК: ${asset.name}`,
+      () => { sources.splice(index, 1); renderFiles(); saveDraft(); }));
   }
+  const trash = button('🗑', `Удалить с ПК: ${asset.name}`, () =>
+    deleteUploaded(asset, role === 'reference' ? 'reference' : 'source'));
+  trash.classList.add('danger-icon');
+  actions.append(trash);
   row.append(actions); return row;
 }
 function renderFiles() {
-  $('reference-drop').hidden = Boolean(reference); 
+  $('reference-drop').hidden = Boolean(reference);
+  $('music-drop').hidden = Boolean(music);
   $('music-info').textContent = music ? `♫ ${music.name} · ${music.id ? 'Загружено' : 'Готово к загрузке'}` : 'Музыка не выбрана';
+  $('delete-music').hidden = !music;
   $('reference-info').hidden = !reference;
   $('reference-info').replaceChildren();
-  if (reference) $('reference-info').append(fileRow(reference));
-  $('source-list').replaceChildren(...sources.map((asset, i) => fileRow(asset, i)));
+  if (reference) $('reference-info').append(fileRow(reference, null, 'reference'));
+  $('source-list').replaceChildren(...sources.map((asset, i) => fileRow(asset, i, 'source')));
   $('source-count').textContent = `${sources.length} / 32`;
+  const unused = library.filter(asset => !sources.some(s => s.id === asset.id));
   $('library-status').hidden = !library.length;
-  $('library-status').textContent = `На сервере ${library.length} / 32 исходников. Убранные из монтажа файлы сохраняются для прошлых версий и учитываются в лимите проекта.`;
-  $('restore-sources').hidden = !library.some(asset => !sources.some(s => s.id === asset.id));
+  $('library-status').textContent = `На ПК загружено ${library.length} / 32 исходников. Ненужные файлы можно удалить через 🗑.`;
+  $('restore-sources').hidden = !unused.length;
+  $('unused-source-list').hidden = !unused.length;
+  $('unused-source-list').replaceChildren(...unused.map(asset => fileRow(asset, null, 'source-hidden')));
 }
 $('restore-sources').addEventListener('click', () => {
   sources.push(...library.filter(asset => !sources.some(s => s.id === asset.id)));
   renderFiles(); saveDraft();
+});
+$('delete-music').addEventListener('click', () => {
+  if (music) deleteUploaded(music, 'music');
 });
 function acceptFiles(files, role) {
   if (busy) return;
