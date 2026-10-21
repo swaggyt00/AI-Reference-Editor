@@ -27,3 +27,11 @@ jobs:
         run: ./node_modules/.bin/remotion still src/index.jsx Motion /tmp/motion.png --frame 30 --props demo-props.json --width 540 --height 960 --public-license-key free-license
       - name: Validate output
         run: file /tmp/motion.png && test -s /tmp/motion.png
+      - name: Install video test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install -r requirements-dev.txt
+      - name: Test real multilayer MP4 and original audio preservation
+        run: python -m unittest discover -s tests -p 'test_motion.py' -v
+
