@@ -1,5 +1,41 @@
 # AI Reference Editor — Codex MVP
 
+## Graphic reconstruction v3 — evidence-first overlays
+
+In **Reference Clone + Gemini + Motion Design**, the director now sends up to
+**three local storyboards of time-coded frames** (max 48 still frames) to the
+existing Gemini edit-plan request. This is a visual input within the same model
+request, NOT a separate AI call, but it can increase image-token usage. The
+browser explicitly asks consent for these storyboard images along with the
+compressed reference/source videos and audio. Original media remains local.
+
+A motion plan can now include validated global-time keyframes for horizontal
+position, vertical position, scale and opacity, observed color/typography
+alignment, and candidate reference graphics. Text and route overlays must cite
+an actual storyboard frame index; other hallucinated overlays are discarded.
+
+The new local **Graphic Extractor** can reuse a simple icon, pixel-art sticker
+or logo from the actual reference IF:
+1. Gemini identifies a qualifying category, bounding box and sample time that
+   coincide with an actual storyboard frame, with confidence >=0.84;
+2. OpenCV verifies either a uniform backdrop around the graphic, or almost
+   unchanged adjacent clean-plate footage with the graphic missing; and
+3. The extracted PNG alpha passes minimum-size and foreground-coverage gates.
+
+Rejected candidates are logged under the local render folder at
+`graphic-assets/graphic-analysis.json`. Extracted PNGs and intermediate
+storyboard JPEGs remain on the PC, not in GitHub. Neither Google nor the system
+can reliably reconstruct hidden artwork, 3D, moving-camera rotoscoping,
+complex alpha shadows or After Effects source layers from a flattened MP4.
+There is NO claim of pixel-perfect video reproduction.
+
+The 76-second supplied reference was checked **locally** against the new
+storyboard generator: it produced 39 timestamped stills in three sheets.
+The creative AI / real Gemini / Windows end-to-end run remains **unverified**,
+because the API key never leaves the user's PC. Offline tests cover the
+storyboard construction, safe alpha extraction and rejection, keyframes,
+and a mocked Gemini image+text edit-plan request.
+
 ## Motion Design — prototype in development
 
 The new **Motion Design (beta)** mode extends Reference Clone using a Remotion

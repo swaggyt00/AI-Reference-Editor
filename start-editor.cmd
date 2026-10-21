@@ -10,7 +10,10 @@ echo ==========================================================
 echo.
 echo This program renders on YOUR PC only.
 echo Keep this window open while using the GitHub Pages editor.
-echo Your videos are NOT uploaded to GitHub or cloud.
+echo No videos are uploaded to GitHub.
+echo CAUTION: If you opt into Gemini AI on the website, smaller copies
+echo of your video and sound are sent to Google. Motion Design also
+echo sends time-coded reference frames. Local-only render sends nothing.
 echo.
 
 REM The optional Motion Design renderer uses a private portable Node install.

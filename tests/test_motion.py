@@ -54,7 +54,11 @@ class RenderTests(unittest.TestCase):
                 for _ in range(3)]))
             layers=[
                 {'kind':'title','text':'HELLO MOTION','start':.2,'end':2.2,
-                 'x':.5,'y':.28,'confidence':.99,'size':36,'animation':'rise'},
+                 'x':.5,'y':.28,'confidence':.99,'size':36,'animation':'rise',
+                 'color':'#f2c231','align':'center',
+                 'track':[{'time':.2,'x':.35,'y':.32,'scale':.8,'opacity':1},
+                          {'time':1.0,'x':.5,'y':.28,'scale':1.0,'opacity':1},
+                          {'time':2.1,'x':.55,'y':.28,'scale':1.2,'opacity':.7}]},
                 {'kind':'badge','text':'GRAPHICS','start':1,'end':2.8,
                  'x':.5,'y':.72,'confidence':.95,'size':24,'animation':'pop'},
                 {'kind':'image','asset':'user-image','start':.5,'end':2.4,

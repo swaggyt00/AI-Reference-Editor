@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import uuid
+import re
 
 KINDS = {'title','caption','card','badge','route','image','video'}
 ANIMATIONS = {'rise','slide','pop','fade'}
@@ -63,6 +64,13 @@ def validate_motion_layers(layers, duration, available_assets=None):
                 continue
             out['text'] = text
             out['size'] = max(16,min(110,float(item.get('size',50))))
+            for key in ('color','background'):
+                # Accept only literal RGB colors, never CSS expressions from AI.
+                value=item.get(key)
+                if isinstance(value,str) and re.fullmatch(r'#[0-9a-fA-F]{6}',value):
+                    out[key]=value
+            if item.get('align') in ('left','center','right'):
+                out['align']=item['align']
             if kind == 'route':
                 pts = item.get('points')
                 if not isinstance(pts,list) or not 2 <= len(pts) <= 12:
@@ -77,6 +85,32 @@ def validate_motion_layers(layers, duration, available_assets=None):
                     good.append([px,py])
                 if len(good)!=len(pts): continue
                 out['points'] = good
+        # Optional observed movement, not a generic movement preset.
+        # Global-second keyframes are read-only data from the AI plan, bounded
+        # and checked before the React player sees them.
+        raw_track=item.get('track')
+        if isinstance(raw_track,list) and 2<=len(raw_track)<=12:
+            keyframes=[]
+            for key in raw_track:
+                if not isinstance(key,dict):
+                    keyframes=[];break
+                try:
+                    t=float(key['time'])
+                    px=float(key['x']);py=float(key['y'])
+                    scale=float(key.get('scale',1))
+                    opacity=float(key.get('opacity',1))
+                except (KeyError,ValueError,TypeError):
+                    keyframes=[];break
+                if not (all(math.isfinite(n) for n in (t,px,py,scale,opacity))
+                        and start-.03<=t<=end+.03
+                        and 0<=px<=1 and 0<=py<=1
+                        and .5<=scale<=2 and 0<=opacity<=1):
+                    keyframes=[];break
+                keyframes.append({'time':round(t,3),'x':px,'y':py,
+                                  'scale':scale,'opacity':opacity})
+            if len(keyframes)>1 and all(a['time']<b['time']
+                                         for a,b in zip(keyframes,keyframes[1:])):
+                out['track']=keyframes
         accepted.append(out)
     return accepted
 

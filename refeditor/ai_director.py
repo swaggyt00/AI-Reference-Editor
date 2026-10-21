@@ -111,7 +111,7 @@ def apply_validated_matches(project, matches):
 
 
 def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
-                          model=DEFAULT_MODEL, progress=None):
+                          model=DEFAULT_MODEL, progress=None, graphics_dir=None):
     """Uploads compressed proxies to Google ONLY for user-opted-in AI render.
 
     One model call per uncached uploaded video + one text-only director call.
@@ -153,6 +153,20 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
         ],
         "task_brief": str(project.get("brief", ""))[:3500],
     }
+    # Real frame evidence is essential: model descriptions alone cannot
+    # locate flattened graphic overlays accurately.
+    storyboards = []
+    frame_index = {}
+    if project.get("motion_design"):
+        from .reference_storyboard import generate_storyboards
+        storyboards, frame_index = generate_storyboards(
+            reference_path, cache_dir / "storyboards",
+            hard_cuts=project["reference_analysis"].get("hard_cuts", []),
+            max_frames=48
+        )
+        context["visual_storyboard"] = frame_index
+        if progress:
+            progress("Gemini: изучение кадров и графики", 37)
     prompt = """You are a senior video-editing SOURCE MATCHER, not a video generator.
 Given reference shots and descriptions of DIFFERENT source footage, select the
 best matching source and SOURCE START TIME for each shot.
@@ -166,7 +180,14 @@ Respond with a JSON object containing ONLY:
  "observed_effects": ["effects visible in reference, only if evidenced"],
  "motion_layers": [
    {"kind":"title", "start":1.2, "end":2.7, "text":"EXACT TEXT VISIBLE",
-    "x":0.5, "y":0.27, "size":72, "animation":"rise", "confidence":0.91}
+    "x":0.5, "y":0.27, "size":72, "animation":"rise", "confidence":0.91,
+    "observed_tile":4, "track":[{"time":1.2,"x":0.5,"y":0.3,"scale":0.8},
+                                 {"time":1.6,"x":0.5,"y":0.27,"scale":1.0}]}
+ ],
+ "graphic_crops": [
+   {"category":"pixel_art", "start":12.5, "end":14.5,
+    "sample_time_s":13.1, "box":[0.2,0.3,0.25,0.2],
+    "confidence":0.91, "animation":"pop"}
  ],
  "limitations": ["what can't be reproduced with the supplied footage"]}.
 Motion layers must accurately reconstruct ACTUALLY VISIBLE OVERLAYS ONLY:
@@ -177,8 +198,26 @@ Motion layers must accurately reconstruct ACTUALLY VISIBLE OVERLAYS ONLY:
   "points": [[0.2,0.8],[0.5,0.3]] tracing the reference graphic. DO NOT
   fabricate map geography or travel coordinates; abstract diagram only.
 - x and y: position of layer CENTER normalized between 0 and 1.
+- When visually clear, match exact foreground "color" and card "background"
+  as #RRGGBB and "align" as left/center/right. Omit if uncertain; never
+  guess unseen typography, logos, or hard-to-read text.
 - animation: fade, rise, slide or pop only if corresponding movement is visible.
 - confidence: use below 0.72 when uncertain, so it will not render.
+- The attached storyboard sheets show ACTUAL reference frames with FRAME indices
+  and exact time labels. Use them to ground text, position, animation and
+  proposed graphic assets. Do not guess unavailable subtitles. Include
+  "observed_tile" matching an actual numbered FRAME for every text/route layer.
+- You may include a bounded "track" with 2-12 explicit samples: global "time",
+  normalized "x","y", "scale" between 0.5 and 2 and "opacity" 0..1.
+  Only emit tracks if motion is visible in more than one evidence frame.
+- "graphic_crops" is for isolated 2D logo, pixel-art, flat sticker, icon, or
+  symbol only. Choose "sample_time_s" EXACTLY from a visible storyboard FRAME.
+  Use a normalized [x,y,width,height] bounding box with a generous flat-color
+  margin around the complete graphic. Do not crop people, photographs,
+  software windows, real-world scenery or text as graphics. These crops will
+  be rejected automatically if background cannot be removed cleanly.
+- Do NOT recreate the entire reference video as an image; use actual source
+  footage for the base and only draw evidenced overlays.
 - never describe UI screenshots, people, or video B-roll as text overlays.
 - video insert overlay (picture-in-picture or B-roll window) ONLY if visible in
   reference AND an uploaded source clearly matches its content.
@@ -194,8 +233,15 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
         progress("Gemini: сопоставление сцен", 37)
     client = get_client()
     try:
+        contents = prompt
+        if storyboards:
+            from google.genai import types
+            contents = [prompt] + [
+                types.Part.from_bytes(data=Path(p).read_bytes(),mime_type="image/jpeg")
+                for p in storyboards
+            ]
         response = client.models.generate_content(
-            model=model, contents=prompt,
+            model=model, contents=contents,
             config={"response_mime_type": "application/json", "temperature": 0.1}
         )
         if not response.text:
@@ -220,11 +266,36 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
     # Gemini observations never cause accidental decorative overlays.
     if project.get("motion_design"):
         from .motion import validate_motion_layers
-        graphics = validate_motion_layers(
-            proposed.get("motion_layers", []), project["duration"],
-            available_assets={"source_" + str(i) for i in range(len(source_paths))}
+        from .graphic_reconstruction import (
+            extract_reference_graphics, save_graphic_report
         )
+        available_tiles={f["tile"] for f in frame_index.get("reference_frames",[])}
+        # Require a real visual evidence tile for each AI-generated title/card.
+        witnessed=[]
+        for layer in proposed.get("motion_layers",[]) if isinstance(proposed.get("motion_layers"),list) else []:
+            if not isinstance(layer,dict):
+                continue
+            if layer.get("kind") in ("title","caption","badge","card","route"):
+                if type(layer.get("observed_tile")) is not int or layer["observed_tile"] not in available_tiles:
+                    continue
+            witnessed.append(layer)
+        graphics_dir = Path(graphics_dir) if graphics_dir else cache_dir/"generated-graphics"
+        extracted=extract_reference_graphics(
+            reference_path, proposed.get("graphic_crops",[]), graphics_dir,
+            duration=project["duration"],
+            allowed_sample_times=[frame["time_s"] for frame in frame_index.get("reference_frames",[])]
+        )
+        save_graphic_report(extracted,graphics_dir/"graphic-analysis.json")
+        graphics = validate_motion_layers(
+            witnessed + extracted["layers"], project["duration"],
+            available_assets=({"source_" + str(i) for i in range(len(source_paths))}
+                              | set(extracted["assets"].keys()))
+        )
+        project["generated_graphic_assets"] = extracted["assets"]
         project["motion_layers"] = graphics
+        plan["storyboard_sheets"] = len(storyboards)
+        plan["graphics_extracted"] = len(extracted["extracted"])
+        plan["graphics_rejected"] = len(extracted["rejected"])
         plan["motion_layers_validated"] = len(graphics)
         if not graphics:
             project["warnings"].append(
