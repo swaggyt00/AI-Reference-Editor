@@ -19,12 +19,36 @@ def main(argv=None):
     r.add_argument('--project',required=True);r.add_argument('--output',required=True)
     r.add_argument('--max-seconds',type=float,default=None)
     commands.add_parser('doctor',help='Check Python dependencies and FFmpeg')
+    ck=commands.add_parser('ai-check',help='Test locally saved Gemini API key (one small API call)')
+    ck.add_argument('--model',default='gemini-3.8-flash')
+    av=commands.add_parser('ai-analyze',help='Opt-in Gemini semantic notes for one supplied video')
+    av.add_argument('--video',required=True)
+    av.add_argument('--role',choices=['reference','source'],default='reference')
+    av.add_argument('--model',default='gemini-3.8-flash')
+    av.add_argument('--output',default='output/gemini-analysis.json')
+    av.add_argument('--confirm-external-upload',action='store_true')
     w=commands.add_parser('web',help='Start the local upload-and-render browser editor')
     w.add_argument('--host',default='127.0.0.1')
     w.add_argument('--port',type=int,default=8000)
     w.add_argument('--storage',default='output/web')
     w.add_argument('--max-upload-mb',type=int,default=2048)
     args=ap.parse_args(argv)
+    if args.command in ('ai-check','ai-analyze'):
+        from .ai_gemini import check_connection, analyze_video as ai_analyze
+        try:
+            if args.command == 'ai-check':
+                result = check_connection(model=args.model)
+                print('Gemini connected:',result['model'],'—',result['response'])
+            else:
+                target = ai_analyze(args.video,args.output,role=args.role,
+                                    model=args.model,
+                                    confirm_external_upload=args.confirm_external_upload)
+                print('Gemini semantic notes saved:',target)
+            return 0
+        except Exception as exc:
+            # Never print SDK internals which might include URLs or sensitive headers.
+            print('Gemini request failed:',type(exc).__name__,file=sys.stderr)
+            return 2
     if args.command=='web':
         if args.max_upload_mb < 1:ap.error('--max-upload-mb must be positive')
         if not all(shutil.which(p) for p in ('ffmpeg','ffprobe')):
