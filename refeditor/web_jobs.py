@@ -281,6 +281,8 @@ class ProjectStore:
                     self.update(pid, rid, stage='Remotion: многослойный монтаж', progress=86)
                     motion_output = out / 'with-motion.mp4'
                     render_motion(mp4, overlay, motion_output,
+                        asset_files={'source_' + str(i): path
+                            for i, path in enumerate(project['source_files'])},
                         duration=project['duration'], fps=round(project['fps']),
                         width=project['width'], height=project['height'])
                     import os
