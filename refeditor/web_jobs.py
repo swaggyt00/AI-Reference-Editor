@@ -257,6 +257,7 @@ class ProjectStore:
                     project, self.media_path(pid, reference),
                     [self.media_path(pid, asset) for asset in sources],
                     directory / 'ai-cache',
+                    graphics_dir=out / 'graphic-assets' if settings.get('motion_design') else None,
                     model=DEFAULT_MODEL,
                     progress=lambda stage, p: self.update(pid, rid, stage=stage, progress=p)
                 )
@@ -282,8 +283,11 @@ class ProjectStore:
                     self.update(pid, rid, stage='Remotion: многослойный монтаж', progress=86)
                     motion_output = out / 'with-motion.mp4'
                     render_motion(mp4, overlay, motion_output,
-                        asset_files={'source_' + str(i): path
-                            for i, path in enumerate(project['source_files'])},
+                        asset_files={
+                            **{'source_' + str(i): path
+                               for i, path in enumerate(project['source_files'])},
+                            **project.get('generated_graphic_assets', {})
+                        },
                         duration=project['duration'], fps=round(project['fps']),
                         width=project['width'], height=project['height'])
                     import os
