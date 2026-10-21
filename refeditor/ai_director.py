@@ -11,6 +11,7 @@ from pathlib import Path
 import hashlib
 
 from .ai_gemini import DEFAULT_MODEL, analyze_video, get_client
+from .ai_resilience import call_with_overload_retry
 from .analyzer import video_metadata
 
 AI_MAX_SOURCES = 3
@@ -50,16 +51,19 @@ def _summary(data):
     return result
 
 
-def _get_or_analyze(file, cache, role, model):
+def _get_or_analyze(file, cache, role, model, on_retry=None):
     cache = Path(cache)
     if cache.is_file():
         try:
             data = json.loads(cache.read_text(encoding="utf-8"))
-            if data["model"] == model and data["role"] == role:
+            # A completed video summary remains usable after the user manually
+            # selects another model. Keep the completed work, not rerun uploads.
+            if data["role"] == role and isinstance(data.get("analysis"), dict):
                 return data
         except (ValueError, KeyError, OSError):
             pass
-    analyze_video(file, cache, role=role, model=model, confirm_external_upload=True)
+    analyze_video(file, cache, role=role, model=model,
+                  confirm_external_upload=True, on_retry=on_retry)
     return json.loads(cache.read_text(encoding="utf-8"))
 
 
@@ -124,7 +128,10 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
     if progress:
         progress("Gemini: анализ референса", 33)
     ref_data = _get_or_analyze(
-        reference_path, cache_dir / "ai-reference.json", "reference", model
+        reference_path, cache_dir / "ai-reference.json", "reference", model,
+        on_retry=(lambda count, code: progress(
+            f"Gemini HTTP {code}: повтор анализа референса {count}/1", 33
+        )) if progress else None
     )
     sources_data = []
     for idx, src in enumerate(source_paths):
@@ -132,7 +139,10 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
             progress(f"Gemini: анализ исходника {idx+1}/{len(source_paths)}", 33 + int(3*(idx+1)/len(source_paths)))
         media_key = hashlib.sha256(str(Path(src).resolve()).encode("utf-8")).hexdigest()[:18]
         data = _get_or_analyze(
-            src, cache_dir / f"ai-source-{media_key}.json", "source", model
+            src, cache_dir / f"ai-source-{media_key}.json", "source", model,
+            on_retry=(lambda count, code: progress(
+                f"Gemini HTTP {code}: повтор анализа исходника {idx+1}/{len(source_paths)}", 35
+            )) if progress else None
         )
         sources_data.append(data)
     source_durations = [video_metadata(s)["duration"] for s in source_paths]
@@ -259,9 +269,14 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
                 types.Part.from_bytes(data=Path(p).read_bytes(),mime_type="image/jpeg")
                 for p in storyboards
             ]
-        response = client.models.generate_content(
-            model=model, contents=contents,
-            config={"response_mime_type": "application/json", "temperature": 0.1}
+        response = call_with_overload_retry(
+            lambda: client.models.generate_content(
+                model=model, contents=contents,
+                config={"response_mime_type": "application/json", "temperature": 0.1}
+            ),
+            on_retry=(lambda count, code: progress(
+                f"Gemini HTTP {code}: повтор монтажного плана {count}/1", 37
+            )) if progress else None
         )
         if not response.text:
             raise RuntimeError("Gemini returned no edit-plan proposal.")
