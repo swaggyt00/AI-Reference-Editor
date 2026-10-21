@@ -132,6 +132,12 @@ class ProjectStore:
             if not ids or len(ids) != len(set(ids)) or any(i not in assets for i in ids):
                 raise ValueError('Выберите загруженные исходники без повторений.')
             settings['source_ids'] = ids
+            if settings.get('ai_semantic'):
+                if len(ids) > 3:
+                    raise ValueError('Первый AI-режим поддерживает до 3 исходников за один запуск.')
+                selected = [state['reference'], *(assets[i] for i in ids)]
+                if any(asset['metadata']['duration'] > 60 for asset in selected):
+                    raise ValueError('Первый AI-режим принимает видео до 60 секунд каждое.')
             rid = uuid4().hex
             prefix = f'/api/projects/{pid}/renders/{rid}/files/'
             run = {'id': rid, 'version': len(state['renders']) + 1, 'status': 'queued',
@@ -176,6 +182,16 @@ class ProjectStore:
                                     align_audio=settings['align_audio'])
             project['brief'] = settings['brief']
             project['web_settings'] = settings
+            if settings.get('ai_semantic'):
+                from .ai_director import run_ai_scene_matching
+                from .ai_gemini import DEFAULT_MODEL
+                run_ai_scene_matching(
+                    project, self.media_path(pid, reference),
+                    [self.media_path(pid, asset) for asset in sources],
+                    directory / 'ai-cache',
+                    model=DEFAULT_MODEL,
+                    progress=lambda stage, p: self.update(pid, rid, stage=stage, progress=p)
+                )
             # Duration is an explicit end trim, not a fabricated new pacing model.
             if settings['max_seconds'] is not None:
                 frame_count = max(1, min(len(analysis['edge_masks']), round(settings['max_seconds'] * project['fps'])))
@@ -183,7 +199,7 @@ class ProjectStore:
             used = {s['source_index'] for s in project['segments'] if s['start_frame'] < round(project['duration'] * project['fps'])}
             if len(used) < len(sources):
                 project['warnings'].append(f'В этом монтаже использовано {len(used)} из {len(sources)} исходников. '
-                    'Число сцен определяется референсом; распределение последовательное. При одной сцене движок выбирает последний исходник.')
+                    'Число сцен определяется референсом; часть исходников может остаться неиспользованной.')
             with self.lock:
                 run = next(r for r in self.projects[pid]['renders'] if r['id'] == rid)
                 project['warnings'] += list(run['warnings'])
@@ -196,7 +212,13 @@ class ProjectStore:
             self.update(pid, rid, stage='Создание сравнения', progress=96)
             contact_sheet(project['reference'], mp4, out / 'comparison.jpg')
             self.update(pid, rid, status='completed', stage='Готово', progress=100, warnings=qa['warnings'])
-        except Exception:
+        except Exception as exc:
             LOG.exception('Render failed: %s/%s', pid, rid)
+            if settings.get('ai_semantic'):
+                from .ai_gemini import safe_error_reason
+                reason = str(exc) if isinstance(exc, ValueError) and str(exc).startswith('AI pilot') else safe_error_reason(exc)
+                error = 'AI-анализ не выполнен: ' + reason + ' Обычный монтаж доступен без AI-режима.'
+            else:
+                error = 'Ошибка чтения или обработки видео. Проверьте файлы и повторите рендер. Подробности в журнале сервера.'
             self.update(pid, rid, status='failed', stage='Не удалось завершить рендер',
-                        error='Ошибка чтения или обработки видео. Проверьте файлы и повторите рендер. Подробности в журнале сервера.')
+                        error=error)
