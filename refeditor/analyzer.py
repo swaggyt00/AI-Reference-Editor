@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import cv2
 import numpy as np
+from .transfer_fx import white_edge_bounds
 
 
 def video_metadata(path):
@@ -46,7 +47,7 @@ def analyze_video(path, out=None, *, progress=None):
     meta=video_metadata(path)
     cap=cv2.VideoCapture(str(path))
     prev_img=None;prev_hist=None
-    diffs=[];hist_diffs=[];bounds=[];lumas=[]
+    diffs=[];hist_diffs=[];bounds=[];white_bounds=[];lumas=[]
     frame_idx=0
     while True:
         ok,frame=cap.read()
@@ -58,6 +59,7 @@ def analyze_video(path, out=None, *, progress=None):
         gray=cv2.cvtColor(small,cv2.COLOR_BGR2GRAY)
         lumas.append(round(float(np.mean(gray)),2))
         bounds.append(black_edge_bounds(frame))
+        white_bounds.append(white_edge_bounds(frame))
         if prev_img is not None:
             diffs.append(float(np.mean(np.abs(small.astype(np.int16)-prev_img.astype(np.int16)))))
             hist_diffs.append(float(cv2.compareHist(hist,prev_hist,cv2.HISTCMP_BHATTACHARYYA)))
@@ -91,7 +93,7 @@ def analyze_video(path, out=None, *, progress=None):
             flashes.append({'frame':i,'time':round(i/meta['fps'],6),
                             'strength':round(min(.9,(arr[i]-base)/160),3)})
     result={'format_version':1,'reference':str(path),'video':meta,
-            'hard_cuts':cuts,'edge_masks':bounds,'flash_events':flashes,
+            'hard_cuts':cuts,'edge_masks':bounds,'white_edge_masks':white_bounds,'flash_events':flashes,
             'luminance_mean':lumas,
             'analysis_limitations':[
               'Automated visual interpretation currently covers hard cuts, digital black side masks, and brief bright flashes.',
