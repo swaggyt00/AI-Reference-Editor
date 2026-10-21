@@ -308,6 +308,27 @@ class WebTests(unittest.TestCase):
         self.assertIsNone(result.json()['music'])
         self.assertFalse(local.exists())
 
+    def test_projects_library_lists_prior_projects_for_site_cleanup(self):
+        self.upload('reference', self.reference)
+        old_id = self.project_id
+        extra = self.client.post('/api/projects')
+        self.assertEqual(extra.status_code, 201)
+        second_id = extra.json()['id']
+        listings = self.client.get('/api/projects')
+        self.assertEqual(listings.status_code, 200)
+        rows = {p['id']: p for p in listings.json()}
+        self.assertIn(old_id, rows)
+        self.assertIn(second_id, rows)
+        self.assertEqual(rows[old_id]['reference_name'], self.reference.name)
+        self.assertEqual(rows[old_id]['sources'], 0)
+        self.assertGreater(rows[old_id]['uploaded_bytes'], 0)
+        self.assertEqual(rows[second_id]['uploaded_bytes'], 0)
+        self.assertNotIn('filesystem_path', rows[old_id])
+        self.assertEqual(self.client.delete('/api/projects/' + old_id).status_code, 200)
+        remaining = {p['id'] for p in self.client.get('/api/projects').json()}
+        self.assertNotIn(old_id, remaining)
+        self.assertIn(second_id, remaining)
+
     def test_delete_entire_project_removes_renders_and_state(self):
         self.prepare()
         run = self.render(audio='none')
