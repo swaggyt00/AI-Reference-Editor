@@ -47,9 +47,10 @@ def safe_error_reason(exc):
     if status == "429":
         return "HTTP 429: Free-tier quota or rate limit reached. Check AI Studio limits."
     if status.startswith("5") and len(status) == 3:
-        return ("Google Gemini temporarily unavailable (HTTP " + status +
-                "). SDK and app retries exhausted. Re-run this project or "
-                "select another model in Gemini settings; completed analysis is cached.")
+        return ("Gemini временно недоступен (HTTP " + status +
+                "). Повторы SDK и агента исчерпаны. Попробуйте повторить рендер "
+                "в этом же проекте или вручную выбрать другую модель Gemini. "
+                "Готовые этапы AI-анализа сохранены.")
     if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
         return "Network/TLS error. Check internet, VPN, proxy, and Windows certificate settings."
     return "Unexpected error (" + type(exc).__name__ + "). Check the local key first using ai-check --local-only."
