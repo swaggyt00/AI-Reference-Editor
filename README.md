@@ -1,5 +1,16 @@
 # AI Reference Editor — Codex MVP
 
+## GitHub Pages + Windows
+
+The public HTML/JS frontend runs on **GitHub Pages**; all private video uploads and FFmpeg processing happen on **your own Windows machine** at `127.0.0.1:8000`, not on GitHub servers. Codex is not needed for everyday rendering.
+
+- Web address (after one-time Pages activation): https://swaggyt00.github.io/AI-Reference-Editor/
+- One-time setup: [WINDOWS_PAGES_SETUP.md](WINDOWS_PAGES_SETUP.md).
+- Download source ZIP, unpack, double-click `start-editor.cmd`; on the Pages site press **«Подключить ПК»** and grant Chrome loopback-network permission.
+- In GitHub repo Settings -> Pages -> source **Deploy from a branch** -> `main` -> `/docs` -> Save.
+- Pages is a static host, not a video server. The local engine works only when this PC is on with the launcher running.
+
+
 Reference-based video editing with DIFFERENT source footage, using Python, OpenCV and FFmpeg. No CapCut is needed. Designed for iterative development in Codex Web or local Codex.
 
 Current scope: automatically finds some hard cuts, digital black edge masks and limited flash candidates, maps source clips chronologically to reference sections, optionally aligns audio when soundtracks overlap, renders MP4 and produces technical QA and visual comparison. Zoom, blur, shake, color and speed curve effects can be hand-authored in project JSON but ARE NOT automatically inferred.
