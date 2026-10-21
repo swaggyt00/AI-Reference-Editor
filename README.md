@@ -1,5 +1,35 @@
 # AI Reference Editor — Codex MVP
 
+## Remove media and projects from the website (Windows local storage)
+
+The latest GitHub Pages interface includes:
+- **🗑 next to the reference or an uploaded source** — permanently delete the
+  *uploaded local copy* of that file from the connected Windows render engine.
+  Unlike **− Убрать из монтажа**, 🗑 also frees that file's project quota.
+  Files removed from the current timeline remain listed below the sources
+  with their own permanent-delete buttons.
+- **🗑 Удалить музыку с ПК** — remove a separately uploaded music file.
+- **🗑 Удалить проект** — permanently delete the *current project's directory*
+  including reference, source videos, music, analyses and all MP4 exports.
+- **📁 Мои проекты** — list older project workspaces left on this Windows PC,
+  open them, or permanently delete them without browsing folders.
+
+Every permanent-delete action asks for confirmation. Operations are blocked
+while a project is uploading or rendering. The buttons control only the
+connected Windows PC, **not** personal original files elsewhere on your disk,
+remote Gemini Files API copies, GitHub files, or downloaded exports already
+saved from the browser to a separate folder.
+
+**Important:** Removing a single upload does not erase already generated MP4s
+or analysis files; delete the entire project for those. Starting a **New project**
+does NOT delete older projects. Files are still retained until you click delete;
+no timed auto-deletion is enabled.
+
+These features require the **updated local server** as well as the updated
+GitHub Pages UI: replace the previous repository code files without deleting
+your `secrets/`, `.venv/`, `tools/`, `motion/node_modules/` or other
+workspaces, then restart `start-editor.cmd` and hard-refresh the website.
+
 ## Internet Editing Intelligence (online knowledge, zero video library)
 
 **No reference-video training collection on your PC.** The editor's new research
