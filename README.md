@@ -13,7 +13,7 @@ The public HTML/JS frontend runs on **GitHub Pages**; all private video uploads 
 
 Reference-based video editing with DIFFERENT source footage, using Python, OpenCV and FFmpeg. No CapCut is needed. Designed for iterative development in Codex Web or local Codex.
 
-Current scope: automatically finds some hard cuts, digital black edge masks and limited flash candidates, maps source clips chronologically to reference sections, optionally aligns audio when soundtracks overlap, renders MP4 and produces technical QA and visual comparison. Zoom, blur, shake, color and speed curve effects can be hand-authored in project JSON but ARE NOT automatically inferred.
+Current scope: two experimental modes — **Reference Clone** (hard cuts, black edge masks, measured light-gray door/panel overlays copied from reference frames, conservative bright flashes, optional shared-audio alignment and Gemini scene matching) and **Smart Reels** (Gemini highlight proposals for one long video and local FFmpeg vertical montage with optional music). Zoom, blur, shake, color and speed curves can be authored in project JSON but ARE NOT automatically inferred. Complex 1:1 VFX and cinematic judgement are NOT guaranteed.
 
 This is a working experimental engine, NOT a fully autonomous senior video editor.
 
@@ -46,7 +46,44 @@ For Codex Cloud / Linux you can run:
 .\.venv\Scripts\python.exe -m refeditor ai-analyze --video "C:\Videos\reference.mp4" --role reference --output "output\reference-semantic.json" --confirm-external-upload
 ```
 
-The command generates a smaller MP4 proxy, uploads **that proxy** and audio to Gemini Files API, requests scene/action and possible effect descriptions, then attempts to delete the cloud copy. It does **not** use the AI estimates as frame-accurate effect parameters or automatically alter a render yet. The next phase integrates a validated scene matcher.
+The stand-alone ai-analyze command generates a smaller MP4 proxy, uploads **that proxy** with audio to Gemini Files API, requests scene/action and effect observations, then attempts to delete the cloud copy. In the browser's Reference Clone Gemini provides source-scene matching as an explicit opt-in; it does not automatically invent or execute arbitrary complex VFX.
+
+### New v2 modes — experimental
+
+**Reference Clone:** upload one reference and one or more sources. Optionally
+enable Gemini to match scenes by subjects, actions and composition. A reference
+effect transfer pass copies measurable hard-cut timing, digital black edges,
+**gray/white moving side panels sampled from the actual reference frames** and
+high-confidence flashes. This is not full 1:1 VFX cloning; particle effects,
+motion graphics, camera tracking, color grading and motion-blur estimation are
+not implemented. Unreliable automatic matches are ignored.
+
+**Smart Reels:** choose this mode in the editor, upload **one** source video
+of 15 seconds to 30 minutes, optionally upload your own MP3/WAV/AAC music,
+set **10–90 seconds** for the output and check the Gemini consent checkbox.
+A compressed proxy of the ENTIRE original with audio is sent to Google. Gemini
+returns approximate highlight time ranges and a story outline. Python rejects
+overlapping or invalid ranges; FFmpeg cuts the *original* footage into
+a 9:16 H.264 MP4 (720×1280 / 30 fps), preserving the source voice and mixing
+music at roughly -17 dB relative to nominal full scale. Export and intermediate
+media remain on your PC. You must review the storytelling and dialogue cuts.
+
+**IMPORTANT limitations:** It is a center-crop vertical frame, with no face/actor
+tracking. It doesn't beat-sync cuts, generate subtitles or identify every
+complex effect. Underlying model timestamps are approximate, and the free-tier
+API does not guarantee video capacity or request completion. A 15-minute
+original can be expensive in free-tier token/quota terms, even as a low-res
+proxy; the engine never falls back to paid providers automatically.
+
+**Testing:** offline GitHub CI runs a real FFmpeg synth-video audio mix and
+tests the Smart Reels local HTTP endpoints with a MOCKED Gemini plan. Your
+actual AI Studio key and end-to-end Gemini video calls are not available to CI,
+and must be tested separately by you on Windows before trusting final results.
+
+**Installation:** Get the latest ZIP from the repo, replace the existing
+code files but retain the existing `secrets/`, `tools/`, `.venv/` and `output/`.
+Restart `start-editor.cmd` and hard-refresh GitHub Pages. You should see a
+mode selector and the optional music picker.
 
 ### Browser AI pilot
 
