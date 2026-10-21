@@ -67,20 +67,51 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
     app = FastAPI(title='AI Reference Editor', lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
     app.state.store = store
 
+    # GitHub Pages serves ONLY static HTML/JS. The user's videos never leave
+    # this loopback process; browser requests go straight to 127.0.0.1.
+    # Allow only the specific GitHub Pages origin, not arbitrary websites.
+    pages_origin = 'https://swaggyt00.github.io'
+    cors_methods = 'GET, POST, OPTIONS'
+    cors_headers = 'Content-Type, X-Refeditor-Client'
+
     @app.middleware('http')
     async def local_api_guard(request, call_next):
-        if request.url.path.startswith('/api/') and request.method not in ('GET', 'HEAD', 'OPTIONS'):
-            origin = request.headers.get('origin')
-            if (request.headers.get('x-refeditor-client') != 'web'
-                or request.headers.get('sec-fetch-site') == 'cross-site'
-                or (origin and urlsplit(origin).netloc != request.headers.get('host'))):
-                return JSONResponse({'detail': 'Разрешены только запросы из интерфейса этого сервера.'}, status_code=403)
+        api_request = request.url.path.startswith('/api/')
+        origin = request.headers.get('origin')
+        pages_request = origin == pages_origin
+        local_origin = bool(origin and urlsplit(origin).netloc == request.headers.get('host'))
+        if api_request:
+            # Chrome may preflight connections from a public secure context to
+            # localhost using Private Network Access; opt in for this one origin.
+            if request.method == 'OPTIONS':
+                if not pages_request and not local_origin:
+                    return JSONResponse({'detail': 'Origin not allowed'}, status_code=403)
+                from fastapi import Response
+                response = Response(status_code=204)
+                response.headers['Access-Control-Allow-Methods'] = cors_methods
+                response.headers['Access-Control-Allow-Headers'] = cors_headers
+                response.headers['Access-Control-Max-Age'] = '600'
+                if pages_request:
+                    response.headers['Access-Control-Allow-Origin'] = pages_origin
+                    if request.headers.get('access-control-request-private-network') == 'true':
+                        response.headers['Access-Control-Allow-Private-Network'] = 'true'
+                response.headers['Vary'] = 'Origin, Access-Control-Request-Private-Network'
+                return response
+            if origin and not (pages_request or local_origin):
+                return JSONResponse({'detail': 'Origin not allowed'}, status_code=403)
+            if request.method not in ('GET', 'HEAD'):
+                if (request.headers.get('x-refeditor-client') != 'web'
+                    or (request.headers.get('sec-fetch-site') == 'cross-site' and not pages_request)):
+                    return JSONResponse({'detail': 'Разрешены только запросы из интерфейса этого сервера.'}, status_code=403)
         response = await call_next(request)
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob:; media-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"
-        if request.url.path.startswith('/api/'):
+        if api_request:
             response.headers['Cache-Control'] = 'no-store'
+            if pages_request:
+                response.headers['Access-Control-Allow-Origin'] = pages_origin
+                response.headers['Vary'] = 'Origin'
         return response
 
     @app.exception_handler(KeyError)
