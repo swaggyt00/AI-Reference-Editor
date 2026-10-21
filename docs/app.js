@@ -334,16 +334,38 @@ function updateHints() {
 }
 ['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic', 'motion-design'].forEach(id =>
   $(id).addEventListener('input', () => {updateHints(); saveDraft();}));
-$('new-project').addEventListener('click', () => {
-  if (busy) return;
-  clearTimeout(pollTimer); projectId = null; reference = null; music = null; sources = []; library = []; runs = []; selectedRun = null;
+function resetWorkspace() {
+  const previous = projectId;
+  clearTimeout(pollTimer);
+  projectId = null; reference = null; music = null; sources = []; library = []; runs = []; selectedRun = null;
+  if (previous) storage.remove(`refeditor-draft-${previous}`);
   storage.remove('refeditor-project'); history.replaceState(null, '', location.pathname);
+  $('delete-project').hidden = true;
   $('editor-form').reset(); $('preview').pause(); $('preview').removeAttribute('src'); $('preview').load();
   $('preview').hidden = true; $('empty-preview').hidden = false; $('download').hidden = true;
   $('artifact-links').hidden = true; $('warnings').hidden = true;
   $('result-meta').textContent = 'Ожидаем материалы'; $('preview-label').textContent = 'MP4 / H.264';
-  message(''); renderFiles(); renderVersions(); updateHints(); setBusy(false);
+  renderFiles(); renderVersions(); updateHints(); setBusy(false);
   status('Готов к работе', 0, 'Загрузите референс и хотя бы один исходник.');
+}
+$('new-project').addEventListener('click', () => {
+  if (busy) return;
+  resetWorkspace();
+  message('Новый проект открыт. Старые файлы не удалены — для их удаления используй кнопку «Удалить проект».');
+});
+$('delete-project').addEventListener('click', async () => {
+  if (busy || !projectId) return;
+  if (!window.confirm('БЕЗВОЗВРАТНО удалить весь текущий проект с ПК? Исчезнут референс, исходники, музыка, временные файлы и ВСЕ готовые MP4-рендеры.')) return;
+  const deleting = projectId;
+  setBusy(true); message('');
+  try {
+    await api('/api/projects/' + deleting, {method:'DELETE'});
+    resetWorkspace();
+    message('Проект удалён с ПК вместе со всеми загруженными файлами и рендерами.');
+  } catch (error) {
+    message('Не удалось удалить проект: ' + error.message);
+    setBusy(false);
+  }
 });
 window.addEventListener('beforeunload', event => {
   if (busy && [reference, ...sources, music].some(asset => asset?.file)) {event.preventDefault(); event.returnValue = '';}
