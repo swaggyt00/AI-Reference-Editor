@@ -33,7 +33,7 @@ function saveProject() {
   saveDraft();
 }
 async function api(url, options = {}) {
-  const response = await fetch(apiUrl(url), {...options, headers: {...headers, ...options.headers}});
+  const response = await fetch(apiUrl(url), {...options, mode: 'cors', targetAddressSpace: 'loopback', headers: {...headers, ...options.headers}});
   if (!response.ok) {
     let data; try { data = await response.json(); } catch { data = {}; }
     const detail = typeof data.detail === 'string' ? data.detail : 'Проверьте параметры запроса.';
@@ -298,4 +298,14 @@ async function init() {
     }
   } else setBusy(false);
 }
-init();
+// Chrome 142+ asks permission before a remote HTTPS site can contact localhost.
+// Trigger the first request from a real click, not on page load.
+$('connect-local').addEventListener('click', async () => {
+  const button = $('connect-local');
+  button.disabled = true;
+  try { await init(); }
+  finally { button.disabled = false; }
+});
+$('connection').textContent = 'Нажмите «Подключить ПК»';
+setBusy(false);
+$('run').disabled = true;
