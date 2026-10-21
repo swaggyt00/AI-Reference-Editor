@@ -34,7 +34,7 @@ For Codex Cloud / Linux you can run:
 
 ## Optional Gemini AI video understanding (no Codex required)
 
-**Status:** a real API connection and opt-in semantic video analysis are available as separate commands. The existing web editor's **Render** button still uses the deterministic video engine; Gemini is **not yet integrated into automatic clip selection or VFX execution**. This separation avoids claiming that AI editing is complete.
+**Status:** Gemini `gemini-3.6-flash` is now integrated as an **opt-in experimental source-scene matcher** in the browser editor. It analyzes video descriptions, proposes shot-to-source matches and source starting times, validates confidence and uses reliable shared-audio matches as higher-priority evidence. It still **cannot reproduce complex VFX automatically** or guarantee senior-level editing; mask/cut timing remains handled locally by OpenCV.
 
 1. Get your own API key from Google AI Studio. Never paste it in chat or GitHub.
 2. On Windows, unpack the latest repository code into your installed project directory, keeping local `.venv`, `tools` and `output` folders.
@@ -47,6 +47,33 @@ For Codex Cloud / Linux you can run:
 ```
 
 The command generates a smaller MP4 proxy, uploads **that proxy** and audio to Gemini Files API, requests scene/action and possible effect descriptions, then attempts to delete the cloud copy. It does **not** use the AI estimates as frame-accurate effect parameters or automatically alter a render yet. The next phase integrates a validated scene matcher.
+
+### Browser AI pilot
+
+The newest GitHub Pages front end has a checkbox **«AI-подбор сцен через Gemini»**.
+You must explicitly tick this and confirm each time before *any* video goes to Google.
+The preview upload includes downsampled video and original audio in lower bitrate; original
+media and final render remain on the Windows computer. The local API key is **never
+sent to the page**.
+
+The pilot supports **1 reference + up to 3 sources**, each **up to 60 seconds**,
+and **12 reference shots**. When semantic analysis is first needed, Gemini processes
+each compressed preview separately and performs one director-matching API request.
+Subsequent renders reuse local cached per-video semantic analyses when possible
+(still using a new text-only director call). This MAY use several API requests per
+project; quotas are not guaranteed and your own provider billing settings apply.
+If Gemini returns an error, AI mode reports failure clearly: switch AI off to
+use ordinary deterministic rendering.
+
+Scene matches below 0.65 confidence are ignored; stronger shared-audio evidence
+is preserved. AI may choose the wrong moments — inspect project.json and the final
+comparison. The model can list suspected effects, but those observations are
+**NOT yet executed**. The free-text brief is provided as a hint for the semantic
+matching prompt, not as an unrestricted command interpreter.
+
+Existing installs: copy the latest repo files over your project installation,
+**keeping `.venv`, `secrets`, `tools` and `output`** and restart
+`start-editor.cmd`. Confirm the page displays the AI checkbox before testing.
 
 **Cost and privacy:** Google may limit free-tier calls. This code cannot verify that your AI Studio project has no billing or guarantee zero charge. Ensure your selected model/project is on the free tier before calling. Free-tier data may be used by the provider to improve services. Ordinary non-AI renders send no video to Google. Exact availability of free-tier models depends on region/account; errors are returned when quota or access is unavailable.
 
