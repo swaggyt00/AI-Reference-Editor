@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import hashlib
 
 from .ai_gemini import DEFAULT_MODEL, analyze_video, get_client
 from .analyzer import video_metadata
@@ -126,8 +127,9 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
     for idx, src in enumerate(source_paths):
         if progress:
             progress(f"Gemini: анализ исходника {idx+1}/{len(source_paths)}", 33 + int(3*(idx+1)/len(source_paths)))
+        media_key = hashlib.sha256(str(Path(src).resolve()).encode("utf-8")).hexdigest()[:18]
         data = _get_or_analyze(
-            src, cache_dir / f"ai-source-{idx}.json", "source", model
+            src, cache_dir / f"ai-source-{media_key}.json", "source", model
         )
         sources_data.append(data)
     source_durations = [video_metadata(s)["duration"] for s in source_paths]
