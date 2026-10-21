@@ -58,9 +58,13 @@ class RenderTests(unittest.TestCase):
                 {'kind':'badge','text':'GRAPHICS','start':1,'end':2.8,
                  'x':.5,'y':.72,'confidence':.95,'size':24,'animation':'pop'},
                 {'kind':'image','asset':'user-image','start':.5,'end':2.4,
-                 'x':.8,'y':.6,'confidence':.99,'width':.2}
+                 'x':.8,'y':.6,'confidence':.99,'width':.2},
+                {'kind':'video','asset':'broll','start':.7,'end':1.8,
+                 'x':.28,'y':.55,'confidence':.9,'width':.25,'height':.18,
+                 'source_start':.2,'animation':'pop'}
             ]
-            render_motion(base,layers,final,asset_files={'user-image':img},
+            render_motion(base,layers,final,
+                          asset_files={'user-image':img,'broll':base},
                           duration=3,fps=30,width=320,height=568)
             self.assertTrue(final.exists() and final.stat().st_size>1000)
             probe=subprocess.run(['ffprobe','-v','error','-show_streams','-of','json',str(final)],
