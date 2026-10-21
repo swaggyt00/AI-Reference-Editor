@@ -13,6 +13,9 @@ echo Keep this window open while using the GitHub Pages editor.
 echo Your videos are NOT uploaded to GitHub or cloud.
 echo.
 
+REM The optional Motion Design renderer uses a private portable Node install.
+if exist "%~dp0tools\node\node.exe" set "PATH=%~dp0tools\node;%PATH%"
+
 REM Use a private FFmpeg copy in the project folder if available.
 set "LOCAL_FFMPEG=%~dp0tools\ffmpeg\bin"
 if exist "%LOCAL_FFMPEG%\ffmpeg.exe" set "PATH=%LOCAL_FFMPEG%;%PATH%"

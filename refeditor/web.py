@@ -28,6 +28,7 @@ class RenderSettings(BaseModel):
     audio: Literal['none', 'reference', 'source'] = 'none'
     align_audio: bool = False
     ai_semantic: bool = False  # Explicit opt-in for sending video proxies to Google Gemini
+    motion_design: bool = False  # Experimental Remotion overlays only when explicitly requested
     max_seconds: float | None = Field(default=None, ge=.1, le=3600)
     source_ids: list[str] | None = Field(default=None, max_length=32)
     editor_mode: Literal['reference','smart_reels'] = 'reference'

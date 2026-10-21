@@ -23,6 +23,7 @@ function settings() {
   return {brief: $('brief').value, mode: $('mode').value, audio: $('audio').value,
     editor_mode: $('editor-mode').value, reel_seconds: Number($('reel-seconds').value || 60),
     align_audio: $('align-audio').checked, ai_semantic: $('ai-semantic').checked,
+    motion_design: $('motion-design').checked,
     max_seconds: $('duration').value ? Number($('duration').value) : null,
     source_ids: sources.filter(s => s.id).map(s => s.id)};
 }
@@ -232,12 +233,17 @@ $('editor-form').addEventListener('submit', async event => {
   }
   if (reel && sources.length !== 1) { message('Smart Reels пока принимает один длинный исходник.'); return; }
   if (reel && !$('ai-semantic').checked) { message('Для интеллектуального Smart Reels включите галочку Gemini и подтвердите передачу сжатой копии видео.'); return; }
+  if ($('motion-design').checked && (reel || !$('ai-semantic').checked)) {
+    message('Motion Design требует Reference Clone и включённого Gemini AI.');
+    return;
+  }
   if ($('ai-semantic').checked) {
     if (!reel && sources.length > 3) { message('Reference Clone AI поддерживает максимум 3 исходника.'); return; }
+    const motionWarning = $('motion-design').checked ? ' ВКЛЮЧЁН Motion Design: Remotion создаст только уверенно найденные анимированные слои, расход API-квоты возможен; перед монтажом требуется setup-motion.cmd.' : '';
     const disclaimer = reel
       ? 'Отправить сжатую копию длинного ролика со звуком в Google Gemini? Понадобится API-квота. Gemini выберет интересные моменты, но может ошибиться. Финальный монтаж выполняется на ПК.'
       : 'Отправить сжатые копии референса и исходников в Google Gemini для анализа? Понадобится API-квота. Сложные VFX пока воспроизводятся только частично.';
-    if (!window.confirm(disclaimer)) return;
+    if (!window.confirm(disclaimer + motionWarning)) return;
   }
   setBusy(true);
   try {
@@ -284,7 +290,7 @@ function updateHints() {
   $('mode-hint').textContent = $('mode').value === 'fit' ? 'Fit меняет скорость исходников под длину сцен референса.' : 'Native сохраняет скорость; если исходник короче сцены, последний кадр удерживается.';
   $('audio-hint').hidden = $('audio').value === 'none';
 }
-['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic'].forEach(id =>
+['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic', 'motion-design'].forEach(id =>
   $(id).addEventListener('input', () => {updateHints(); saveDraft();}));
 $('new-project').addEventListener('click', () => {
   if (busy) return;
@@ -324,6 +330,7 @@ async function init() {
         $('editor-mode').value = options.editor_mode || 'reference';
         $('reel-seconds').value = options.reel_seconds || 60;
         $('ai-semantic').checked = options.ai_semantic || false;
+        $('motion-design').checked = options.motion_design || false;
         if (Array.isArray(options.source_ids)) sources = options.source_ids.map(id => state.sources.find(s => s.id === id)).filter(Boolean);
       }
       saveProject(); renderFiles(); updateHints(); updateRunState(state);

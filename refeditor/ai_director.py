@@ -19,15 +19,17 @@ AI_MAX_SCENES = 12
 AI_MIN_CONFIDENCE = .65
 
 
-def validate_budget(reference, sources, segments):
-    """Protect free-tier users against accidental excessive API usage."""
+def validate_budget(reference, sources, segments, *, motion_design=False):
+    """Hard, stated pilot limits; longer reference only for explicit Motion Design."""
     if not (1 <= len(sources) <= AI_MAX_SOURCES):
         raise ValueError("AI pilot supports up to three source videos per render.")
-    if len(segments) > AI_MAX_SCENES:
-        raise ValueError("AI pilot supports up to twelve reference shots.")
+    max_scenes = 40 if motion_design else AI_MAX_SCENES
+    if len(segments) > max_scenes:
+        raise ValueError("AI reference has too many distinct shots for this pilot.")
+    max_seconds = 120 if motion_design else AI_MAX_CLIP_SECONDS
     for file in [reference, *sources]:
-        if video_metadata(file)["duration"] > AI_MAX_CLIP_SECONDS:
-            raise ValueError("AI pilot accepts videos of at most 60 seconds each.")
+        if video_metadata(file)["duration"] > max_seconds:
+            raise ValueError("AI pilot accepts videos up to " + str(max_seconds) + " seconds.")
     return True
 
 
@@ -115,7 +117,8 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
     One model call per uncached uploaded video + one text-only director call.
     Models may have quotas, so abort rather than silently falling back.
     """
-    validate_budget(reference_path, source_paths, project["segments"])
+    validate_budget(reference_path, source_paths, project["segments"],
+                    motion_design=bool(project.get("motion_design")))
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     if progress:
@@ -161,7 +164,29 @@ Respond with a JSON object containing ONLY:
 {"matches": [{"shot_index":0,"source_index":0,"source_start_s":0.0,
              "confidence":0.85,"reason":"short description"}],
  "observed_effects": ["effects visible in reference, only if evidenced"],
+ "motion_layers": [
+   {"kind":"title", "start":1.2, "end":2.7, "text":"EXACT TEXT VISIBLE",
+    "x":0.5, "y":0.27, "size":72, "animation":"rise", "confidence":0.91}
+ ],
  "limitations": ["what can't be reproduced with the supplied footage"]}.
+Motion layers must accurately reconstruct ACTUALLY VISIBLE OVERLAYS ONLY:
+- kinds: title, caption, card, badge, route. Never add generic marketing text.
+- text: exact visible wording from reference, omit uncertain or unreadable text.
+- start/end: actual overlay appearance as best estimated from visual evidence.
+- route: only when an actual graphic route is visible. Provide 2-12 normalized
+  "points": [[0.2,0.8],[0.5,0.3]] tracing the reference graphic. DO NOT
+  fabricate map geography or travel coordinates; abstract diagram only.
+- x and y: position of layer CENTER normalized between 0 and 1.
+- animation: fade, rise, slide or pop only if corresponding movement is visible.
+- confidence: use below 0.72 when uncertain, so it will not render.
+- never describe UI screenshots, people, or video B-roll as text overlays.
+- video insert overlay (picture-in-picture or B-roll window) ONLY if visible in
+  reference AND an uploaded source clearly matches its content.
+  Use kind:"video", asset:"source_0" (zero-based index), source_start:0.0,
+  x/y frame center, width:0.75,height:0.35, start/end and confidence>=0.8.
+  Omit if no matching source exists. No unsupplied clips or graphics.
+- do not fabricate image assets. They must be supplied separately.
+
 The matching confidence is between 0 and 1, under 0.65 means uncertain.
 Do not suggest adding generic flashy transitions when absent in the reference.
 DATA: """ + json.dumps(context, ensure_ascii=False)
@@ -191,6 +216,21 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
         "limitations": limitations[:25] if isinstance(limitations, list) else [],
         "effect_execution": "NOT enabled: observations require frame-accurate validation"
     }
+    # Keep only supported, bounded, high-confidence graphics; low-confidence
+    # Gemini observations never cause accidental decorative overlays.
+    if project.get("motion_design"):
+        from .motion import validate_motion_layers
+        graphics = validate_motion_layers(
+            proposed.get("motion_layers", []), project["duration"],
+            available_assets={"source_" + str(i) for i in range(len(source_paths))}
+        )
+        project["motion_layers"] = graphics
+        plan["motion_layers_validated"] = len(graphics)
+        if not graphics:
+            project["warnings"].append(
+                "Gemini found no confident reproducible text/route overlays. "
+                "No generic motion graphics will be invented."
+            )
     project["ai_scene_plan"] = plan
     if not applied:
         project["warnings"].append(

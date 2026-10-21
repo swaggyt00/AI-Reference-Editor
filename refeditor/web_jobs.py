@@ -132,6 +132,10 @@ class ProjectStore:
                 if not settings.get('ai_semantic'):
                     raise ValueError('Smart Reels требует включить и подтвердить Gemini AI-анализ.')
             settings, warnings = resolve_settings(settings)
+            if settings.get('motion_design') and (
+                settings.get('editor_mode') != 'reference' or not settings.get('ai_semantic')
+            ):
+                raise ValueError('Motion Design требует Reference Clone и включённого Gemini AI.')
             ids = settings.get('source_ids')
             assets = {s['id']: s for s in state['sources']}
             if ids is None:
@@ -149,8 +153,9 @@ class ProjectStore:
                 if len(ids) > 3:
                     raise ValueError('Первый AI-режим поддерживает до 3 исходников за один запуск.')
                 selected = [state['reference'], *(assets[i] for i in ids)]
-                if any(asset['metadata']['duration'] > 60 for asset in selected):
-                    raise ValueError('Первый AI-режим принимает видео до 60 секунд каждое.')
+                max_clip = 120 if settings.get('motion_design') else 60
+                if any(asset['metadata']['duration'] > max_clip for asset in selected):
+                    raise ValueError('AI-режим принимает видео до ' + str(max_clip) + ' секунд каждое.')
             rid = uuid4().hex
             prefix = f'/api/projects/{pid}/renders/{rid}/files/'
             run = {'id': rid, 'version': len(state['renders']) + 1, 'status': 'queued',
@@ -243,6 +248,7 @@ class ProjectStore:
                                     mode=settings['mode'], audio=settings['audio'],
                                     align_audio=settings['align_audio'])
             project['brief'] = settings['brief']
+            project['motion_design'] = settings.get('motion_design', False)
             project['web_settings'] = settings
             if settings.get('ai_semantic'):
                 from .ai_director import run_ai_scene_matching
@@ -268,7 +274,25 @@ class ProjectStore:
             write_project(project, out / 'project.json')
             self.update(pid, rid, stage='Рендер видео', progress=38, warnings=project['warnings'])
             mp4 = stream_render(project, out / 'final.mp4',
-                progress=lambda done, total: self.update(pid, rid, progress=38 + int(50 * done / total)))
+                progress=lambda done, total: self.update(pid, rid, progress=38 + int(46 * done / total)))
+            if settings.get('motion_design'):
+                overlay = project.get('motion_layers', [])
+                if overlay:
+                    from .motion import render_motion
+                    self.update(pid, rid, stage='Remotion: многослойный монтаж', progress=86)
+                    motion_output = out / 'with-motion.mp4'
+                    render_motion(mp4, overlay, motion_output,
+                        asset_files={'source_' + str(i): path
+                            for i, path in enumerate(project['source_files'])},
+                        duration=project['duration'], fps=round(project['fps']),
+                        width=project['width'], height=project['height'])
+                    import os
+                    os.replace(motion_output, mp4)
+                else:
+                    project['warnings'].append(
+                        'Motion Design: уверенные слои отсутствуют, исходный монтаж сохранён.'
+                    )
+            write_project(project, out / 'project.json')
             self.update(pid, rid, stage='Проверка видео и аудио', progress=91)
             qa = qa_report(project, mp4, out / 'qa_report.json')
             self.update(pid, rid, stage='Создание сравнения', progress=96)
@@ -276,7 +300,12 @@ class ProjectStore:
             self.update(pid, rid, status='completed', stage='Готово', progress=100, warnings=qa['warnings'])
         except Exception as exc:
             LOG.exception('Render failed: %s/%s', pid, rid)
-            if settings.get('ai_semantic'):
+            if settings.get('motion_design') and (
+                str(exc).startswith('Remotion not installed.') or
+                str(exc).startswith('Remotion failed:')
+            ):
+                error = 'Motion Design: ' + str(exc)[:450] + ' Обычный режим доступен без этой опции.'
+            elif settings.get('ai_semantic'):
                 from .ai_gemini import safe_error_reason
                 reason = str(exc) if isinstance(exc, ValueError) and str(exc).startswith('AI pilot') else safe_error_reason(exc)
                 error = 'AI-анализ не выполнен: ' + reason + ' Обычный монтаж доступен без AI-режима.'
