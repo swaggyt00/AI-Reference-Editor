@@ -15,17 +15,18 @@ GitHub -> репозиторий `swaggyt00/AI-Reference-Editor` -> Settings -> 
 Когда публикация закончится, адрес будет https://swaggyt00.github.io/AI-Reference-Editor/.
 Это нужно сделать один раз в настройках GitHub: создание файлов /docs само по себе не гарантирует публикацию.
 
-## Шаг 2. Установите необходимые программы на Windows (один раз)
+## Шаг 2. FFmpeg теперь устанавливается автоматически
 
-Откройте «Терминал Windows» (PowerShell) и установите, если их ещё нет:
+**Winget НЕ требуется.** При первом запуске `start-editor.cmd` проверяет доступность FFmpeg.
+Если FFmpeg отсутствует, `scripts/install_ffmpeg.ps1` скачает официальный
+`ffmpeg-release-essentials.zip` (~110 МБ) с https://www.gyan.dev/ffmpeg/builds/ ,
+сверит SHA-256 с подписью контрольной суммы опубликованной на этом же сайте,
+распакует `ffmpeg.exe` и `ffprobe.exe` в `tools/ffmpeg/bin`.
+Системные переменные среды и права администратора НЕ требуются.
 
-```powershell
-winget install -e --id Python.Python.3.11
-winget install -e --id Gyan.FFmpeg
-```
-
-После установки **закройте и заново откройте терминал**: иначе PATH может не обновиться.
-Команды проверки: `py -3 --version`, `ffmpeg -version` и `ffprobe -version`.
+На компьютере всё равно нужен Python 3.11+ (и pip). Если нет Python:
+https://www.python.org/downloads/windows/ — при установке включите «Add Python to PATH».
+Проверьте `py -3 --version` или `python --version` в новой консоли.
 
 ## Шаг 3. Установите движок
 
