@@ -147,6 +147,10 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
                              'max_project_bytes': max_project_bytes, 'max_sources': 32},
                             status_code=200 if ready else 503)
 
+    @app.get('/api/projects')
+    def list_projects():
+        return store.list_projects()
+
     @app.post('/api/projects', status_code=201)
     def new_project():
         return store.create()
