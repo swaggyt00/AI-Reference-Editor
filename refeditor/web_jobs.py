@@ -18,7 +18,8 @@ from .renderer import stream_render
 
 LOG = logging.getLogger(__name__)
 ACTIVE = {'queued', 'running'}
-FILES = {'final.mp4', 'project.json', 'qa_report.json', 'comparison.jpg'}
+FILES = {'final.mp4', 'project.json', 'qa_report.json', 'comparison.jpg',
+         'motion_graphics_qa.json'}
 BRIEF_WARNING = ('Свободный текст сохранён как задание для редактора, но автоматически не исполнен. '
                  'Применяются только отдельные строки «звук: нет/референс/исходник», '
                  '«режим: fit/native», «длительность: число секунд».')
@@ -163,7 +164,8 @@ class ProjectStore:
                    'warnings': warnings, 'error': None,
                    'video_url': prefix + 'final.mp4', 'download_url': prefix + 'final.mp4?download=1',
                    'project_url': prefix + 'project.json', 'qa_url': prefix + 'qa_report.json',
-                   'comparison_url': prefix + 'comparison.jpg'}
+                   'comparison_url': prefix + 'comparison.jpg',
+                   'motion_qa_url': prefix + 'motion_graphics_qa.json'}
             state['renders'].append(run)
             self.save(state)
             self.executor.submit(self.process, pid, rid, deepcopy(state['reference']),
@@ -296,6 +298,25 @@ class ProjectStore:
                     project['warnings'].append(
                         'Motion Design: уверенные слои отсутствуют, исходный монтаж сохранён.'
                     )
+            if settings.get('motion_design'):
+                analysis_plan=project.get('ai_scene_plan', {})
+                report={
+                    'status':'experimental_reference_graphics',
+                    'storyboard_sheets':analysis_plan.get('storyboard_sheets',0),
+                    'motion_layers_validated':len(project.get('motion_layers',[])),
+                    'graphics_extracted':analysis_plan.get('graphics_extracted',0),
+                    'graphics_rejected':analysis_plan.get('graphics_rejected',0),
+                    'confidence_policy':'Model graphics require a visible storyboard frame. '
+                                        'Crops require a verified separable background.',
+                    'limitations':[
+                        'Gemini estimates text and animation from sampled video frames.',
+                        'Only some isolated 2D elements can be extracted as PNG.',
+                        'No automatic universal AE reconstruction, 3D VFX, rotoscoping or object tracking.',
+                        'Inspect final MP4: technical tests do not guarantee creative quality.'
+                    ]
+                }
+                (out / 'motion_graphics_qa.json').write_text(
+                    json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
             write_project(project, out / 'project.json')
             self.update(pid, rid, stage='Проверка видео и аудио', progress=91)
             qa = qa_report(project, mp4, out / 'qa_report.json')
