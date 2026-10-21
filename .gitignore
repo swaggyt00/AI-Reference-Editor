@@ -30,3 +30,6 @@ output/*
 
 # Machine-local downloaded binaries (never commit)
 tools/
+
+# Windows DPAPI-protected Gemini key; NEVER commit
+secrets/
