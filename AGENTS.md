@@ -1,6 +1,8 @@
 # AI Reference Editor — Codex agent instructions
 
-You are improving a reference-driven editor for a user who supplies a finished reference video and DIFFERENT source footage. Match reference montage grammar, cuts, motion rhythm, masks, VFX and sound as faithfully as evidence permits. Do not add effects absent from the reference.
+You are improving a GENERAL-PURPOSE reference-driven editor. Every task may provide a completely new finished reference and completely different footage. Match reference montage grammar, cuts, motion rhythm, masks, VFX and sound as faithfully as evidence permits. Do not add effects absent from the reference. Never build in assumptions about characters, locations, scenes, filenames, effects or timing from previous tasks.
+
+The original four-video example was a disposable validation case, not training data, a supported project template, or an input dependency.
 
 ## Rules
 
@@ -11,7 +13,7 @@ You are improving a reference-driven editor for a user who supplies a finished r
 5. Check the rendered final.mp4, visual comparison, boundaries, durations and audio; technical QA alone does not establish senior creative quality.
 6. Never call a result “1:1” if the user supplies different footage and the movements do not match.
 7. Keep Python+FFmpeg cross-platform; do not require CapCut.
-8. Repo omits private original MP4 files. Do not expect demo files to exist in Codex Cloud. Do not claim upload feature already exists. See WEB_CODEX.md.
+8. Repository contains only reusable source code; no customer/reference footage belongs in git. Accept arbitrary media paths per new job. Do not claim upload feature already exists. See WEB_CODEX.md.
 
 ## Setup / commands
 
@@ -35,4 +37,4 @@ Not implemented: semantic shot retrieval; automatic zoom/blur/shake/speed-ramp d
 3. Add automated visual/audio critique and revision loop, evaluated on real paired examples.
 4. Add secure upload storage + web UI + rendered file delivery to make it a practical browser-based editor.
 
-Always run tests and a real render when video input is available. Fix regressions without removing working features.
+Always run tests and a real render when video input is available. Fix regressions without removing working features. Never describe a test-specific implementation as a general-purpose capability without testing on unrelated inputs.
