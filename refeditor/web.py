@@ -93,7 +93,7 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
     # this loopback process; browser requests go straight to 127.0.0.1.
     # Allow only the specific GitHub Pages origin, not arbitrary websites.
     pages_origin = 'https://swaggyt00.github.io'
-    cors_methods = 'GET, POST, OPTIONS'
+    cors_methods = 'GET, POST, DELETE, OPTIONS'
     cors_headers = 'Content-Type, X-Refeditor-Client'
 
     @app.middleware('http')
@@ -154,6 +154,24 @@ def create_app(storage_dir='output/web', *, max_upload_bytes=2 * 1024**3, max_pr
     @app.get('/api/projects/{pid}')
     def get_project(pid: str):
         return store.get(pid)
+
+    @app.delete('/api/projects/{pid}/media/{asset_id}')
+    def delete_uploaded_media(pid: str, asset_id: str):
+        try:
+            return store.delete_media(pid, asset_id)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except OSError as exc:
+            raise HTTPException(500, 'Не удалось удалить файл на ПК. Возможно, он открыт другой программой.') from exc
+
+    @app.delete('/api/projects/{pid}')
+    def delete_project(pid: str):
+        try:
+            return store.delete_project(pid)
+        except ValueError as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except OSError as exc:
+            raise HTTPException(500, 'Не удалось удалить проект на ПК. Закройте файлы и повторите.') from exc
 
     @app.post('/api/projects/{pid}/media', status_code=201)
     async def upload(pid: str, request: Request, role: Literal['reference', 'source', 'music'],
