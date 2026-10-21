@@ -1,7 +1,15 @@
 'use strict';
+const API_ORIGIN = 'http://127.0.0.1:8000';
+// The GitHub Pages site sends files DIRECTLY from the browser to this Windows PC.
+// Never relay media through GitHub or a remote server.
+function apiUrl(path) {
+  if (typeof path !== 'string' || !path.startsWith('/api/')) throw new Error('Invalid local API path');
+  return API_ORIGIN + path;
+}
+
 const $ = (id) => document.getElementById(id);
 const headers = {'X-Refeditor-Client': 'web'};
-let projectId = null, reference = null, sources = [], library = [], runs = [], busy = false;
+let projectId = null, reference = null, music = null, sources = [], library = [], runs = [], busy = false;
 let selectedRun = null, pollTimer = null, maxBytes = 2 * 1024 ** 3, ready = false;
 const active = (run) => ['queued', 'running'].includes(run.status);
 const storage = {
@@ -13,6 +21,7 @@ function message(text) { $('error').textContent = text; $('error').hidden = !tex
 function size(bytes) { return bytes >= 1024 ** 3 ? `${(bytes / 1024 ** 3).toFixed(1)} ГБ` : bytes >= 1024 ** 2 ? `${(bytes / 1024 ** 2).toFixed(1)} МБ` : `${Math.ceil(bytes / 1024)} КБ`; }
 function settings() {
   return {brief: $('brief').value, mode: $('mode').value, audio: $('audio').value,
+    editor_mode: $('editor-mode').value, reel_seconds: Number($('reel-seconds').value || 60),
     align_audio: $('align-audio').checked, ai_semantic: $('ai-semantic').checked,
     max_seconds: $('duration').value ? Number($('duration').value) : null,
     source_ids: sources.filter(s => s.id).map(s => s.id)};
@@ -26,7 +35,7 @@ function saveProject() {
   saveDraft();
 }
 async function api(url, options = {}) {
-  const response = await fetch(url, {...options, headers: {...headers, ...options.headers}});
+  const response = await fetch(apiUrl(url), {...options, mode: 'cors', targetAddressSpace: 'loopback', headers: {...headers, ...options.headers}});
   if (!response.ok) {
     let data; try { data = await response.json(); } catch { data = {}; }
     const detail = typeof data.detail === 'string' ? data.detail : 'Проверьте параметры запроса.';
@@ -80,7 +89,8 @@ function fileRow(asset, index = null) {
   row.append(actions); return row;
 }
 function renderFiles() {
-  $('reference-drop').hidden = Boolean(reference);
+  $('reference-drop').hidden = Boolean(reference); 
+  $('music-info').textContent = music ? `♫ ${music.name} · ${music.id ? 'Загружено' : 'Готово к загрузке'}` : 'Музыка не выбрана';
   $('reference-info').hidden = !reference;
   $('reference-info').replaceChildren();
   if (reference) $('reference-info').append(fileRow(reference));
@@ -98,13 +108,15 @@ function acceptFiles(files, role) {
   if (busy) return;
   message('');
   if (role === 'reference' && reference?.id) { message('Для другого референса начните новый проект.'); return; }
-  if (role === 'reference' && files.length !== 1) { message('Выберите один референс.'); return; }
+  if (role === 'music' && music?.id) { message('Для другой музыки начните новый проект.'); return; }
+  if ((role === 'reference' || role === 'music') && files.length !== 1) { message('Выберите один файл.'); return; }
   const valid = [];
   for (const file of files) {
     if (file.size > maxBytes || !file.size) { message(`«${file.name}»: файл пустой или больше ${size(maxBytes)}.`); continue; }
     valid.push({file, name: file.name, size: file.size});
   }
   if (role === 'reference') reference = valid[0] || reference;
+  else if (role === 'music') music = valid[0] || music;
   else {
     if (library.length + sources.filter(s => !s.id).length + valid.length > 32) {
       message('В проекте можно хранить до 32 исходников, включая убранные из монтажа. Верните загруженные файлы или начните новый проект.'); return;
@@ -113,7 +125,7 @@ function acceptFiles(files, role) {
   }
   renderFiles();
 }
-for (const [inputId, dropId, role] of [['reference', 'reference-drop', 'reference'], ['sources', 'source-drop', 'source']]) {
+for (const [inputId, dropId, role] of [['reference', 'reference-drop', 'reference'], ['sources', 'source-drop', 'source'], ['music', 'music-drop', 'music']]) {
   $(inputId).addEventListener('change', event => {acceptFiles([...event.target.files], role); event.target.value = '';});
   const zone = $(dropId);
   zone.addEventListener('dragover', event => {event.preventDefault(); if (!busy) zone.classList.add('dragging');});
@@ -124,7 +136,7 @@ function upload(asset, role, number, total) {
   return new Promise((resolve, reject) => {
     asset.uploadId ||= Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/api/projects/${projectId}/media?${new URLSearchParams({role, name: asset.name, upload_id: asset.uploadId})}`);
+    xhr.open('POST', apiUrl(`/api/projects/${projectId}/media?${new URLSearchParams({role, name: asset.name, upload_id: asset.uploadId})}`));
     xhr.setRequestHeader('X-Refeditor-Client', 'web');
     xhr.upload.onprogress = event => {
       const fraction = event.lengthComputable ? event.loaded / event.total : 0;
@@ -144,13 +156,13 @@ async function showResult(run) {
   if (!run || run.status !== 'completed') return;
   selectedRun = run.id;
   $('empty-preview').hidden = true; $('preview').hidden = false;
-  if ($('preview').getAttribute('src') !== run.video_url) { $('preview').src = run.video_url; $('preview').load(); }
+  if ($('preview').getAttribute('src') !== apiUrl(run.video_url)) { $('preview').src = apiUrl(run.video_url); $('preview').load(); }
   $('preview-label').textContent = `ВЕРСИЯ ${String(run.version).padStart(2, '0')} / MP4`;
-  $('download').hidden = false; $('download').href = run.download_url;
+  $('download').hidden = false; $('download').href = apiUrl(run.download_url);
   $('download').download = `reference-edit-v${run.version}.mp4`;
   $('artifact-links').hidden = false;
-  $('project-link').href = run.project_url; $('project-link').download = `project-v${run.version}.json`;
-  $('qa-link').href = run.qa_url; $('comparison-link').href = run.comparison_url;
+  $('project-link').href = apiUrl(run.project_url); $('project-link').download = `project-v${run.version}.json`;
+  $('qa-link').href = apiUrl(run.qa_url); $('comparison-link').href = apiUrl(run.comparison_url);
   $('result-meta').textContent = `Версия ${run.version}`;
   renderVersions();
   try {
@@ -213,20 +225,29 @@ function schedulePoll(delay = 1000) {
 $('editor-form').addEventListener('submit', async event => {
   event.preventDefault(); if (busy) return;
   message('');
-  if (!reference || !sources.length) { message('Выберите референс и хотя бы один исходник.'); return; }
+  const reel = $('editor-mode').value === 'smart_reels';
+  if (!sources.length || (!reel && !reference)) {
+    message(reel ? 'Для Smart Reels нужен исходный длинный ролик.' : 'Нужны референс и хотя бы один исходник.');
+    return;
+  }
+  if (reel && sources.length !== 1) { message('Smart Reels пока принимает один длинный исходник.'); return; }
+  if (reel && !$('ai-semantic').checked) { message('Для интеллектуального Smart Reels включите галочку Gemini и подтвердите передачу сжатой копии видео.'); return; }
   if ($('ai-semantic').checked) {
-    if (sources.length > 3) { message('Экспериментальный AI-режим поддерживает максимум 3 исходника.'); return; }
-    if (!window.confirm('Отправить сжатые копии выбранных видео и звука в Google Gemini для анализа? Возможен расход бесплатной API-квоты. Ключ останется на ПК. Это пока AI-подбор сцен, НЕ копирование сложных VFX.')) return;
+    if (!reel && sources.length > 3) { message('Reference Clone AI поддерживает максимум 3 исходника.'); return; }
+    const disclaimer = reel
+      ? 'Отправить сжатую копию длинного ролика со звуком в Google Gemini? Понадобится API-квота. Gemini выберет интересные моменты, но может ошибиться. Финальный монтаж выполняется на ПК.'
+      : 'Отправить сжатые копии референса и исходников в Google Gemini для анализа? Понадобится API-квота. Сложные VFX пока воспроизводятся только частично.';
+    if (!window.confirm(disclaimer)) return;
   }
   setBusy(true);
   try {
     if (!projectId) { const state = await api('/api/projects', {method: 'POST'}); projectId = state.id; saveProject(); }
-    const pending = [reference, ...sources].filter(asset => asset.file && !asset.id);
+    const pending = [reference, ...sources, music].filter(asset => asset?.file && !asset.id);
     let count = 0;
     for (const asset of pending) {
-      const saved = await upload(asset, asset === reference ? 'reference' : 'source', ++count, pending.length);
+      const saved = await upload(asset, asset === reference ? 'reference' : asset === music ? 'music' : 'source', ++count, pending.length);
       Object.assign(asset, saved); delete asset.file;
-      if (asset !== reference && !library.some(s => s.id === saved.id)) library.push(saved);
+      if (asset !== reference && asset !== music && !library.some(s => s.id === saved.id)) library.push(saved);
       renderFiles(); saveDraft();
     }
     status('Запуск обработки', 0, 'Передаём задание движку…', 1);
@@ -247,13 +268,27 @@ $('editor-form').addEventListener('submit', async event => {
   }
 });
 function updateHints() {
+  const smart = $('editor-mode').value === 'smart_reels';
+  $('reference-section').hidden = smart;
+  $('reels-fields').hidden = !smart;
+  $('reference-options').hidden = smart;
+  $('source-order-hint').textContent = smart
+    ? 'Для Smart Reels выберите один исходный ролик 15 секунд — 30 минут.'
+    : 'В Reference Clone движок переносит подтверждённые склейки и маски; Gemini подбирает исходники.';
+  $('brief-mode-hint').textContent = smart
+    ? 'Gemini учитывает вашу задачу при выборе лучших моментов и монтаже короткого Reels.'
+    : 'В Reference Clone свободная задача — подсказка Gemini, точное выполнение сложных указаний не гарантируется.';
+  $('ai-consent-hint').textContent = smart
+    ? 'Для Smart Reels требуется Gemini: сжатая копия со звуком отправляется в Google с вашего согласия. Ролики до 30 минут. Не гарантируется идеальный выбор моментов.'
+    : 'Gemini отправляются сжатые копии видео со звуком только с вашего согласия. До 3 исходников и 60 секунд на видео. Сложные эффекты воспроизводятся частично.';
   $('mode-hint').textContent = $('mode').value === 'fit' ? 'Fit меняет скорость исходников под длину сцен референса.' : 'Native сохраняет скорость; если исходник короче сцены, последний кадр удерживается.';
   $('audio-hint').hidden = $('audio').value === 'none';
 }
-['brief', 'mode', 'audio', 'duration', 'align-audio'].forEach(id => $(id).addEventListener('input', () => {updateHints(); saveDraft();}));
+['brief', 'mode', 'audio', 'duration', 'align-audio', 'editor-mode', 'reel-seconds', 'ai-semantic'].forEach(id =>
+  $(id).addEventListener('input', () => {updateHints(); saveDraft();}));
 $('new-project').addEventListener('click', () => {
   if (busy) return;
-  clearTimeout(pollTimer); projectId = null; reference = null; sources = []; library = []; runs = []; selectedRun = null;
+  clearTimeout(pollTimer); projectId = null; reference = null; music = null; sources = []; library = []; runs = []; selectedRun = null;
   storage.remove('refeditor-project'); history.replaceState(null, '', location.pathname);
   $('editor-form').reset(); $('preview').pause(); $('preview').removeAttribute('src'); $('preview').load();
   $('preview').hidden = true; $('empty-preview').hidden = false; $('download').hidden = true;
@@ -263,7 +298,7 @@ $('new-project').addEventListener('click', () => {
   status('Готов к работе', 0, 'Загрузите референс и хотя бы один исходник.');
 });
 window.addEventListener('beforeunload', event => {
-  if (busy && [reference, ...sources].some(asset => asset?.file)) {event.preventDefault(); event.returnValue = '';}
+  if (busy && [reference, ...sources, music].some(asset => asset?.file)) {event.preventDefault(); event.returnValue = '';}
 });
 $('preview').addEventListener('error', () => {
   if ($('preview').getAttribute('src')) message('Браузер не смог воспроизвести видео. Попробуйте скачать MP4 и открыть его в видеоплеере.');
@@ -274,18 +309,21 @@ async function init() {
     const health = await api('/api/health'); ready = health.ready; maxBytes = health.max_upload_bytes;
     $('connection').textContent = 'Движок подключён'; $('connection').classList.add('ready');
     $('file-limit').textContent = `Форматы FFmpeg · до ${size(maxBytes)} на файл · до ${size(health.max_project_bytes)} в проекте`;
-  } catch { $('connection').textContent = 'Движок недоступен'; message('Проверьте запуск сервера, FFmpeg и ffprobe, затем обновите страницу.'); }
+  } catch { $('connection').textContent = 'Движок недоступен'; message('Локальный монтажный сервер недоступен. Запустите start-editor.cmd на своём Windows-ПК, убедитесь, что FFmpeg установлен, и обновите страницу. Если Chrome попросит разрешить доступ к локальной сети — разрешите.'); }
   const saved = location.hash.slice(1) || storage.get('refeditor-project');
   if (saved && /^[a-f0-9]{32}$/.test(saved)) {
     try {
       const state = await api(`/api/projects/${saved}`);
-      projectId = saved; reference = state.reference; sources = [...state.sources]; library = state.sources;
+      projectId = saved; reference = state.reference; music = state.music || null; sources = [...state.sources]; library = state.sources;
       let draft; try { draft = JSON.parse(storage.get(`refeditor-draft-${saved}`)); } catch { draft = null; }
       const options = draft || state.renders.at(-1)?.settings;
       if (options) {
         $('brief').value = options.brief || ''; $('mode').value = options.mode || 'fit';
         $('audio').value = options.audio || 'none'; $('duration').value = options.max_seconds ?? '';
         $('align-audio').checked = options.align_audio || false;
+        $('editor-mode').value = options.editor_mode || 'reference';
+        $('reel-seconds').value = options.reel_seconds || 60;
+        $('ai-semantic').checked = options.ai_semantic || false;
         if (Array.isArray(options.source_ids)) sources = options.source_ids.map(id => state.sources.find(s => s.id === id)).filter(Boolean);
       }
       saveProject(); renderFiles(); updateHints(); updateRunState(state);
@@ -295,4 +333,15 @@ async function init() {
     }
   } else setBusy(false);
 }
-init();
+// Chrome 142+ asks permission before a remote HTTPS site can contact localhost.
+// Trigger the first request from a real click, not on page load.
+$('connect-local').addEventListener('click', async () => {
+  const button = $('connect-local');
+  button.disabled = true;
+  try { await init(); }
+  finally { button.disabled = false; }
+});
+$('connection').textContent = 'Нажмите «Подключить ПК»';
+setBusy(false);
+$('run').disabled = true;
+updateHints();
