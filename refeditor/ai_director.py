@@ -177,7 +177,12 @@ Motion layers must accurately reconstruct ACTUALLY VISIBLE OVERLAYS ONLY:
 - animation: fade, rise, slide or pop only if corresponding movement is visible.
 - confidence: use below 0.72 when uncertain, so it will not render.
 - never describe UI screenshots, people, or video B-roll as text overlays.
-- do not fabricate image or video media assets. They must be supplied separately.
+- video insert overlay (picture-in-picture or B-roll window) ONLY if visible in
+  reference AND an uploaded source clearly matches its content.
+  Use kind:"video", asset:"source_0" (zero-based index), source_start:0.0,
+  x/y frame center, width:0.75,height:0.35, start/end and confidence>=0.8.
+  Omit if no matching source exists. No unsupplied clips or graphics.
+- do not fabricate image assets. They must be supplied separately.
 
 The matching confidence is between 0 and 1, under 0.65 means uncertain.
 Do not suggest adding generic flashy transitions when absent in the reference.
@@ -213,7 +218,8 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
     if project.get("motion_design"):
         from .motion import validate_motion_layers
         graphics = validate_motion_layers(
-            proposed.get("motion_layers", []), project["duration"]
+            proposed.get("motion_layers", []), project["duration"],
+            available_assets={"source_" + str(i) for i in range(len(source_paths))}
         )
         project["motion_layers"] = graphics
         plan["motion_layers_validated"] = len(graphics)
