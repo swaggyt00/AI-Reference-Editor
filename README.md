@@ -32,6 +32,24 @@ For Codex Cloud / Linux you can run:
 
     bash scripts/setup_cloud.sh
 
+## Optional Gemini AI video understanding (no Codex required)
+
+**Status:** a real API connection and opt-in semantic video analysis are available as separate commands. The existing web editor's **Render** button still uses the deterministic video engine; Gemini is **not yet integrated into automatic clip selection or VFX execution**. This separation avoids claiming that AI editing is complete.
+
+1. Get your own API key from Google AI Studio. Never paste it in chat or GitHub.
+2. On Windows, unpack the latest repository code into your installed project directory, keeping local `.venv`, `tools` and `output` folders.
+3. Double-click `configure-gemini.cmd`, paste the key at its hidden PowerShell prompt and choose whether to make one tiny API test request.
+4. Windows DPAPI encrypts the key at `secrets/gemini.key` for your Windows user profile. This directory is gitignored.
+5. To analyze a video **only when you authorize upload to Google**:
+
+```powershell
+.\.venv\Scripts\python.exe -m refeditor ai-analyze --video "C:\Videos\reference.mp4" --role reference --output "output\reference-semantic.json" --confirm-external-upload
+```
+
+The command generates a smaller MP4 proxy, uploads **that proxy** and audio to Gemini Files API, requests scene/action and possible effect descriptions, then attempts to delete the cloud copy. It does **not** use the AI estimates as frame-accurate effect parameters or automatically alter a render yet. The next phase integrates a validated scene matcher.
+
+**Cost and privacy:** Google may limit free-tier calls. This code cannot verify that your AI Studio project has no billing or guarantee zero charge. Ensure your selected model/project is on the free tier before calling. Free-tier data may be used by the provider to improve services. Ordinary non-AI renders send no video to Google. Exact availability of free-tier models depends on region/account; errors are returned when quota or access is unavailable.
+
 ## Browser editor
 
 Start the local web interface (no Node.js or frontend build required):
