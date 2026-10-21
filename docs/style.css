@@ -925,3 +925,20 @@ progress::-moz-progress-bar {
   font-size:10px;
   padding:8px 12px
 }
+
+
+/* Destructive actions are visually distinct from "hide from this edit". */
+.button.danger {
+  color:#982d2d;
+  border-color:#e6c9c9;
+  background:#fff7f7;
+}
+.button.danger:hover { background:#fce5e5; }
+.button.danger-lite { color:#982d2d; margin-top:9px; }
+.icon-button.danger-icon { color:#9e3030; border-color:#edcece; }
+.icon-button.danger-icon:hover { background:#faebeb; }
+#unused-source-list { margin:12px 0; }
+@media(max-width:700px) {
+  .top-actions { gap:7px; flex-wrap:wrap; justify-content:flex-end; }
+  #delete-project { font-size:11px; padding:8px 10px; }
+}
