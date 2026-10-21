@@ -269,6 +269,115 @@ class WebTests(unittest.TestCase):
         qa = self.client.get(run['qa_url']).json()
         self.assertEqual(qa['resolution'], '162x122')
 
+    def test_delete_one_uploaded_file_is_physical_and_replaceable(self):
+        self.prepare()
+        run = self.render(audio='none')
+        state = self.client.get(self.url).json()
+        reference_id = state['reference']['id']
+        source_id = state['sources'][0]['id']
+        file_folder = Path(self.temp.name) / self.project_id / 'media'
+        self.assertTrue((file_folder / (reference_id + '.media')).is_file())
+        self.assertTrue((file_folder / (source_id + '.media')).is_file())
+        deleted = self.client.delete(self.url + '/media/' + source_id)
+        self.assertEqual(deleted.status_code, 200, deleted.text)
+        self.assertFalse((file_folder / (source_id + '.media')).exists())
+        self.assertEqual(len(deleted.json()['sources']), 1)
+        self.assertEqual(self.client.delete(self.url + '/media/' + source_id).status_code, 404)
+        self.assertEqual(self.client.delete(self.url + '/media/../../etc').status_code, 404)
+        # Existing rendered versions intentionally remain playable.
+        self.assertEqual(self.client.get(run['video_url']).status_code, 200)
+        deleted_ref = self.client.delete(self.url + '/media/' + reference_id)
+        self.assertEqual(deleted_ref.status_code, 200, deleted_ref.text)
+        self.assertIsNone(deleted_ref.json()['reference'])
+        self.assertFalse((file_folder / (reference_id + '.media')).exists())
+        self.assertEqual(self.upload('reference', self.reference)['name'], self.reference.name)
+        self.assertEqual(self.upload('source', self.source)['name'], self.source.name)
+        self.assertEqual(len(self.client.get(self.url).json()['sources']), 2)
+
+    def test_delete_music_and_reject_unauthorized_delete(self):
+        music = self.upload('music', self.reference)  # has a valid audio track
+        local = Path(self.temp.name) / self.project_id / 'media' / (music['id'] + '.media')
+        self.assertTrue(local.exists())
+        self.assertEqual(self.client.delete(self.url + '/media/' + music['id'],
+            headers={'Origin': 'https://evil.example'}).status_code, 403)
+        with TestClient(self.app) as no_header:
+            self.assertEqual(no_header.delete(self.url + '/media/' + music['id']).status_code, 403)
+        self.assertTrue(local.exists())
+        result = self.client.delete(self.url + '/media/' + music['id'])
+        self.assertEqual(result.status_code, 200, result.text)
+        self.assertIsNone(result.json()['music'])
+        self.assertFalse(local.exists())
+
+    def test_projects_library_lists_prior_projects_for_site_cleanup(self):
+        self.upload('reference', self.reference)
+        old_id = self.project_id
+        extra = self.client.post('/api/projects')
+        self.assertEqual(extra.status_code, 201)
+        second_id = extra.json()['id']
+        listings = self.client.get('/api/projects')
+        self.assertEqual(listings.status_code, 200)
+        rows = {p['id']: p for p in listings.json()}
+        self.assertIn(old_id, rows)
+        self.assertIn(second_id, rows)
+        self.assertEqual(rows[old_id]['reference_name'], self.reference.name)
+        self.assertEqual(rows[old_id]['sources'], 0)
+        self.assertGreater(rows[old_id]['uploaded_bytes'], 0)
+        self.assertEqual(rows[second_id]['uploaded_bytes'], 0)
+        self.assertNotIn('filesystem_path', rows[old_id])
+        self.assertEqual(self.client.delete('/api/projects/' + old_id).status_code, 200)
+        remaining = {p['id'] for p in self.client.get('/api/projects').json()}
+        self.assertNotIn(old_id, remaining)
+        self.assertIn(second_id, remaining)
+
+    def test_delete_entire_project_removes_renders_and_state(self):
+        self.prepare()
+        run = self.render(audio='none')
+        folder = Path(self.temp.name) / self.project_id
+        self.assertTrue((folder / 'renders' / run['id'] / 'final.mp4').is_file())
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertTrue(response.json()['deleted'])
+        self.assertFalse(folder.exists())
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.assertEqual(self.client.get(run['video_url']).status_code, 404)
+        self.assertEqual(self.client.delete(self.url).status_code, 404)
+        self.assertEqual(self.client.post('/api/projects').status_code, 201)
+
+    def test_delete_refused_during_render_or_upload(self):
+        self.prepare()
+        asset = self.client.get(self.url).json()['sources'][0]
+        entered, release = Event(), Event()
+        from refeditor.web_jobs import stream_render
+
+        def waiting_render(*args, **kwargs):
+            entered.set()
+            release.wait(7)
+            return stream_render(*args, **kwargs)
+
+        with patch('refeditor.web_jobs.stream_render', side_effect=waiting_render):
+            response = self.client.post(self.url + '/renders', json={})
+            self.assertEqual(response.status_code, 202)
+            self.assertTrue(entered.wait(5))
+            try:
+                self.assertEqual(self.client.delete(self.url).status_code, 409)
+                self.assertEqual(self.client.delete(self.url + '/media/' + asset['id']).status_code, 409)
+            finally:
+                release.set()
+        deadline = time.monotonic() + 25
+        while time.monotonic() < deadline:
+            if self.client.get(self.url).json()['renders'][-1]['status'] not in ('queued', 'running'):
+                break
+            time.sleep(.05)
+        with self.app.state.store.lock:
+            self.app.state.store.uploading.add(self.project_id)
+        try:
+            self.assertEqual(self.client.delete(self.url).status_code, 409)
+            self.assertEqual(self.client.delete(self.url + '/media/' + asset['id']).status_code, 409)
+        finally:
+            with self.app.state.store.lock:
+                self.app.state.store.uploading.discard(self.project_id)
+        self.assertEqual(self.client.delete(self.url).status_code, 200)
+
     def test_upload_retry_is_idempotent_after_response_loss(self):
         upload_id = 'b' * 32
         params = {'role': 'reference', 'name': self.reference.name, 'upload_id': upload_id}
