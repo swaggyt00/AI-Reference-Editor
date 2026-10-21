@@ -30,7 +30,7 @@ if errorlevel 1 (
   echo ERROR: Windows PowerShell not found. Unable to download FFmpeg.
   goto :fail
 )
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\install_ffmpeg.ps1" -ProjectRoot "%~dp0"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\install_ffmpeg.ps1" -ProjectRoot "%CD%"
 if errorlevel 1 goto :fail
 set "PATH=%LOCAL_FFMPEG%;%PATH%"
 where ffmpeg >nul 2>&1
