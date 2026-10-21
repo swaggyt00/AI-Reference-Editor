@@ -19,3 +19,7 @@ jobs:
         run: |
           python -m refeditor doctor
           python -m unittest discover -s tests -v
+      - name: Check JavaScript syntax
+        run: |
+          node --check docs/app.js
+          node --check refeditor/static/app.js
