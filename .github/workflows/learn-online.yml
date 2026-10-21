@@ -1,0 +1,36 @@
+name: Internet editing knowledge refresh
+on:
+  schedule:
+    - cron: '17 5 * * 1,4'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: online-editing-knowledge
+  cancel-in-progress: false
+jobs:
+  research:
+    if: github.repository == 'swaggyt00/AI-Reference-Editor'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Research metadata from allowlisted official docs
+        run: python scripts/refresh_knowledge.py
+      - name: Commit SMALL TEXT index only — no videos or model keys
+        run: |
+          if git diff --quiet -- docs/knowledge.json; then
+            echo "No changes to the knowledge index."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/knowledge.json
+          git commit -m "chore: refresh online editing technique references [skip ci]"
+          git push origin HEAD:main
