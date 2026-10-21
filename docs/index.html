@@ -81,6 +81,15 @@
               </div>
               <div class="notice" style="margin:12px 0;padding:12px;border:1px solid #d7e4df;border-radius:10px;background:#f0f6f2;">
                 <label class="checkbox-label" style="font-weight:600"><input type="checkbox" id="ai-semantic"> 🧠 Использовать Gemini (экспериментальный)</label>
+                <div id="gemini-model-field" style="margin:12px 0" hidden>
+                  <label for="gemini-model">Gemini — модель для AI-анализа</label>
+                  <select id="gemini-model" style="width:100%;padding:10px;border-radius:8px">
+                    <option value="gemini-3.6-flash">Gemini 3.6 Flash — текущая</option>
+                    <option value="gemini-3.8-flash">Gemini 3.8 Flash — резервная, выше нагрузка/стоимость</option>
+                    <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite — резервная, слабее анализ</option>
+                  </select>
+                  <p class="hint">При HTTP 503 сервер сделает один дополнительный повтор после попыток SDK. На другую модель агент сам не переключается. Доступность бесплатного тарифа зависит от твоего проекта Google.</p>
+                </div>
                 <label class="checkbox-label" style="font-weight:600;display:block;margin-top:14px">
                   <input type="checkbox" id="motion-design"> ✨ Motion Design — анимированные титры, карточки и графика (бета)
                 </label>
