@@ -15,6 +15,44 @@ import time
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 
+def safe_error_reason(exc):
+    """Render safe actionable error text. Never include API keys or request bodies."""
+    own_reasons = {
+        "Gemini API key not configured. Run configure-gemini.cmd first.",
+        "Encrypted Gemini key can be unlocked only on the Windows user profile that created it.",
+        "The Gemini key is invalid or empty. Run configure-gemini.cmd again.",
+        "Saved Gemini API key is empty or damaged.",
+        "Gemini SDK missing. Install requirements-ai.txt.",
+        "Model returned an empty response.",
+        "Gemini returned an empty analysis.",
+        "Gemini returned invalid JSON.",
+        "Gemini returned unexpected JSON shape.",
+    }
+    message = str(exc)
+    if message in own_reasons:
+        return message
+    if message.startswith("Unable to decrypt local Gemini key."):
+        return "Windows cannot decrypt the saved key. Please run configure-gemini.cmd under the same Windows account."
+    if message.startswith("Optional Gemini dependency is missing."):
+        return "Google Gemini SDK is missing. Run configure-gemini.cmd."
+    status = getattr(exc, "code", None) or getattr(exc, "status_code", None)
+    status = str(status)
+    if status == "400":
+        return "HTTP 400: Google rejected the API request. Check model settings and compatibility."
+    if status == "401":
+        return "HTTP 401: Google rejected the API key. Check its validity in AI Studio."
+    if status == "403":
+        return "HTTP 403: Key/project lacks permission, location is restricted, or model access is denied."
+    if status == "404":
+        return "HTTP 404: Model is unavailable for this key/project. Try another free-tier model."
+    if status == "429":
+        return "HTTP 429: Free-tier quota or rate limit reached. Check AI Studio limits."
+    if status.startswith("5") and len(status) == 3:
+        return "Gemini API server error (HTTP " + status + "). Try again later."
+    if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
+        return "Network/TLS error. Check internet, VPN, proxy, and Windows certificate settings."
+    return "Unexpected error (" + type(exc).__name__ + "). Check the local key first using ai-check --local-only."
+
 
 def load_api_key(project_root=None):
     """Read from environment or Windows-user-DPAPI encrypted secrets/gemini.key."""
