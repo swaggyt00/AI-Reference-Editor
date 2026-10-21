@@ -112,6 +112,9 @@ def bounded_discover(home_url, hrefs, known_urls):
         path = parsed.path.lower().rstrip("/")
         if not path.startswith("/docs/") or path.count("/")>5:
             continue
+        if path.endswith((".mp4",".mov",".avi",".webm",".mkv",".jpg",".png",
+                          ".gif",".webp",".zip",".js",".exe",".py",".tsx")):
+            continue
         if not any(w in path for w in TECHNIQUE_WORDS):
             continue
         normalized = "https://www.remotion.dev" + path
