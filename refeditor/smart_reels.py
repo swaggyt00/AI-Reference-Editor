@@ -12,6 +12,7 @@ import subprocess
 import tempfile
 
 from .ai_gemini import DEFAULT_MODEL, _encode_preview, get_client
+from .ai_resilience import call_with_overload_retry
 from .analyzer import video_metadata
 
 
@@ -121,9 +122,11 @@ Provide enough distinct clips totaling {target_seconds} seconds, each normally
 coherent narrative progression. Timestamps refer to the ORIGINAL source file.
 Do not hallucinate words or events. If no good highlights are present, say so
 by returning fewer or no highlights. Timing is approximate and needs human review."""
-            response = client.models.generate_content(
-                model=model, contents=[remote, prompt],
-                config={"response_mime_type": "application/json", "temperature": 0.15}
+            response = call_with_overload_retry(
+                lambda: client.models.generate_content(
+                    model=model, contents=[remote, prompt],
+                    config={"response_mime_type": "application/json", "temperature": 0.15}
+                )
             )
             if not response.text:
                 raise ValueError("Gemini returned an empty highlight proposal")
