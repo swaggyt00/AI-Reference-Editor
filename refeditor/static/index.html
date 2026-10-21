@@ -7,14 +7,21 @@
   <title>AI Reference Editor — монтаж по референсу</title>
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/app.js" defer></script>
+  <meta name="referrer" content="no-referrer">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="/" aria-label="AI Reference Editor, главная"><span class="brand-mark" aria-hidden="true">R<span>↗</span></span><span>REFERENCE<span class="brand-sub">EDITOR / WORKSPACE</span></span></a>
-    <div class="top-actions"><span class="connection" id="connection">Проверка движка…</span><button type="button" class="button subtle" id="new-project">＋ Новый проект</button></div>
+    <div class="top-actions"><span class="connection" id="connection">Нажмите «Подключить ПК»</span><button type="button" class="button subtle" id="connect-local">↔ Подключить ПК</button><button type="button" class="button subtle" id="new-project">＋ Новый проект</button></div>
   </header>
   <main>
-    <div class="page-heading"><div><p class="eyebrow">ВАШИ КАДРЫ. РИТМ РЕФЕРЕНСА.</p><h1>Соберите свой монтаж<span>.</span></h1><p class="intro">От референса и исходников — к первой версии видео.</p></div><span class="local-badge">Локальная рабочая среда</span></div>
+    <div class="page-heading"><div><p class="eyebrow">ВАШИ КАДРЫ. РИТМ РЕФЕРЕНСА.</p><h1>Соберите свой монтаж<span>.</span></h1><p class="intro">От референса и исходников — к первой версии видео.</p></div><span class="local-badge">GitHub Pages · обработка на вашем ПК</span></div>
+    <div class="notice" role="note" style="margin-bottom:1rem;background:#e8f2ed;border:1px solid #c8d9ce;border-radius:12px;padding:12px 16px;">
+      <strong>Монтаж на вашем ПК.</strong> GitHub Pages показывает только интерфейс.
+      Для обработки видео запустите <code>start-editor.cmd</code> на своём Windows-компьютере и держите окно открытым.
+      Видео передаётся напрямую браузером в локальный движок <code>127.0.0.1:8000</code>, а не на GitHub.
+      <a href="https://github.com/swaggyt00/AI-Reference-Editor#github-pages--windows">Инструкция</a>.
+    </div>
     <div id="error" class="notice error" role="alert" hidden></div>
     <form id="editor-form">
       <div class="workspace">
