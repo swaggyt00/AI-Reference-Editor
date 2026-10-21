@@ -50,7 +50,9 @@ class GeminiSafetyTests(unittest.TestCase):
         with patch("refeditor.ai_gemini.load_api_key", return_value="local-dummy-key-123456789"):
             from unittest.mock import MagicMock
             import sys
-            with patch.dict(sys.modules, {"google.genai": MagicMock()}):
+            fake_google = MagicMock()
+            fake_google.genai = MagicMock()
+            with patch.dict(sys.modules, {"google": fake_google, "google.genai": fake_google.genai}):
                 result = check_local_setup()
                 self.assertEqual(result['status'], 'local_key_ready')
 
