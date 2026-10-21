@@ -13,7 +13,7 @@ import subprocess
 import tempfile
 import uuid
 
-KINDS = {'title','caption','card','badge','route','image'}
+KINDS = {'title','caption','card','badge','route','image','video'}
 ANIMATIONS = {'rise','slide','pop','fade'}
 MAX_LAYERS = 50
 MAX_DURATION = 300
@@ -45,12 +45,18 @@ def validate_motion_layers(layers, duration, available_assets=None):
         out = {'kind': kind, 'start': round(start,3),
                'end':round(min(end,duration),3), 'x':x, 'y':y,
                'animation': item.get('animation') if item.get('animation') in ANIMATIONS else 'fade'}
-        if kind == 'image':
+        if kind in ('image','video'):
             asset = item.get('asset')
             if not isinstance(asset,str) or asset not in available_assets:
                 continue
             out['asset'] = asset
             out['width'] = max(.15, min(.95, float(item.get('width',.65))))
+            if kind == 'video':
+                t = float(item.get('source_start',0))
+                if not math.isfinite(t) or t < 0 or t > 3600:
+                    continue
+                out['source_start'] = t
+                out['height'] = max(.1,min(.95,float(item.get('height',.32))))
         else:
             text = item.get('text')
             if not isinstance(text,str) or not text.strip() or len(text) > 180:
@@ -118,14 +124,14 @@ def render_motion(base_video, layers, output, *, asset_files=None, duration=None
         for idx,(key,path) in enumerate((asset_files or {}).items()):
             if any(item.get('asset')==key for item in valid):
                 path=Path(path).resolve()
-                if not path.is_file() or path.suffix.lower() not in ('.png','.jpg','.jpeg','.webp'):
-                    raise ValueError('Only real local image assets are supported')
+                if not path.is_file() or path.suffix.lower() not in ('.png','.jpg','.jpeg','.webp','.mp4','.mov','.webm'):
+                    raise ValueError('Only local image or video assets are supported')
                 filename='asset-'+token+'-'+str(idx)+path.suffix.lower()
                 dest=work/filename
                 shutil.copy2(path,dest);created.append(dest)
                 mapping[key]=filename
         for item in valid:
-            if item['kind']=='image':item['asset']=mapping[item['asset']]
+            if item['kind'] in ('image','video'):item['asset']=mapping[item['asset']]
         props_path.write_text(json.dumps({'baseFile':video_name,'layers':valid}),encoding='utf-8')
         frames=max(1,int(round(duration*fps)))
         cmd=[str(program),'render','src/index.jsx','Motion',str(video_output),
