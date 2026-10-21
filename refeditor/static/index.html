@@ -46,6 +46,10 @@
                 <div><label for="mode">Скорость</label><select id="mode"><option value="fit">Подогнать под референс</option><option value="native">Сохранить исходную</option></select></div>
                 <div><label for="audio">Аудио</label><select id="audio"><option value="none">Без звука</option><option value="reference">Из референса</option><option value="source">Из первого исходника</option></select></div>
               </div>
+              <div class="notice" style="margin:12px 0;padding:12px;border:1px solid #d7e4df;border-radius:10px;background:#f0f6f2;">
+                <label class="checkbox-label" style="font-weight:600"><input type="checkbox" id="ai-semantic"> 🧠 AI-подбор сцен через Gemini (экспериментальный)</label>
+                <p class="hint">По вашему отдельному подтверждению сжатые копии референса и исходников, включая звук, передаются Google для анализа. До 3 исходников и 60 секунд на файл. Может расходовать API-квоту. Учитывает содержание сцен, но НЕ переносит сложные эффекты автоматически.</p>
+              </div>
               <p class="hint" id="mode-hint">Fit меняет скорость исходников под длину сцен референса.</p>
               <details class="advanced"><summary>Дополнительные настройки</summary><div class="duration-field"><label for="duration">Обрезать результат до, секунд</label><input id="duration" type="number" min="0.1" max="3600" step="0.1" placeholder="Длина референса"><p class="hint">Обрезка конца видео; не удлиняет референс.</p></div><label class="checkbox-label"><input type="checkbox" id="align-audio" checked> Автоматически определять сцены по общему звуку</label><p class="hint">Работает только при наличии общей звуковой дорожки.</p></details>
               <p class="hint" id="audio-hint" hidden>Используйте звук, на который у вас есть разрешение. Дорожка первого исходника берётся с начала; автоматического звукового монтажа нет.</p>
