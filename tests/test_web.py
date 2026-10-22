@@ -116,6 +116,17 @@ class WebTests(unittest.TestCase):
             self.assertEqual(len(restarted.get(self.url).json()['renders']), 2)
             self.assertEqual(restarted.get(second['video_url']).status_code, 200)
 
+    def test_reference_clone_ai_allows_more_than_three_uploaded_sources(self):
+        self.prepare()
+        self.upload('source', self.source)
+        self.upload('source', self.source)
+        self.assertEqual(len(self.client.get(self.url).json()['sources']), 4)
+        with patch('refeditor.ai_director.run_ai_scene_matching') as director:
+            run=self.render(ai_semantic=True,audio='none')
+        self.assertEqual(run['status'],'completed')
+        self.assertEqual(director.call_count,1)
+        self.assertEqual(len(director.call_args.args[2]),4)
+
     def test_selected_ai_model_reaches_director_without_real_gemini_request(self):
         self.prepare()
         with patch('refeditor.ai_director.run_ai_scene_matching') as director:
