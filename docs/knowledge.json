@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-21T21:00:08+00:00",
+  "generated_at": "2026-10-22T10:16:23+00:00",
   "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
   "sources": [
     {
@@ -28,7 +28,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:55+00:00",
+      "checked_at": "2026-10-22T10:16:10+00:00",
       "status": "ok"
     },
     {
@@ -58,7 +58,7 @@
         "Rules ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:55+00:00",
+      "checked_at": "2026-10-22T10:16:10+00:00",
       "status": "ok"
     },
     {
@@ -89,7 +89,7 @@
         "Example: CSS transform values v 4.0.472 ​",
         "Example: Discrete string values v 4.0.509 ​"
       ],
-      "checked_at": "2026-10-21T20:59:55+00:00",
+      "checked_at": "2026-10-22T10:16:10+00:00",
       "status": "ok"
     },
     {
@@ -117,7 +117,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:56+00:00",
+      "checked_at": "2026-10-22T10:16:10+00:00",
       "status": "ok"
     },
     {
@@ -141,7 +141,7 @@
         "Captions",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:56+00:00",
+      "checked_at": "2026-10-22T10:16:10+00:00",
       "status": "ok"
     },
     {
@@ -168,7 +168,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:56+00:00",
+      "checked_at": "2026-10-22T10:16:10+00:00",
       "status": "ok"
     },
     {
@@ -194,7 +194,7 @@
         "Working with large files ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:56+00:00",
+      "checked_at": "2026-10-22T10:16:11+00:00",
       "status": "ok"
     },
     {
@@ -217,7 +217,7 @@
         "Using audio",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T20:59:57+00:00",
+      "checked_at": "2026-10-22T10:16:11+00:00",
       "status": "ok"
     },
     {
@@ -266,7 +266,7 @@
         "Lucas-Kanade Optical Flow in OpenCV",
         "Dense Optical Flow in OpenCV"
       ],
-      "checked_at": "2026-10-21T21:00:05+00:00",
+      "checked_at": "2026-10-22T10:16:20+00:00",
       "status": "ok"
     },
     {
@@ -291,7 +291,7 @@
         "Template Matching in OpenCV",
         "Template Matching with Multiple Objects"
       ],
-      "checked_at": "2026-10-21T21:00:06+00:00",
+      "checked_at": "2026-10-22T10:16:20+00:00",
       "status": "ok"
     },
     {
@@ -320,7 +320,7 @@
         "Technical details about videos",
         "What's next"
       ],
-      "checked_at": "2026-10-21T21:00:06+00:00",
+      "checked_at": "2026-10-22T10:16:21+00:00",
       "status": "ok"
     },
     {
@@ -346,7 +346,7 @@
         "Trail ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T21:00:06+00:00",
+      "checked_at": "2026-10-22T10:16:22+00:00",
       "status": "ok"
     },
     {
@@ -371,7 +371,7 @@
         "Functions ​",
         "License ​"
       ],
-      "checked_at": "2026-10-21T21:00:07+00:00",
+      "checked_at": "2026-10-22T10:16:22+00:00",
       "status": "ok"
     },
     {
@@ -400,7 +400,7 @@
         "Animation helpers ​",
         "Full projects ​"
       ],
-      "checked_at": "2026-10-21T21:00:07+00:00",
+      "checked_at": "2026-10-22T10:16:22+00:00",
       "status": "ok"
     },
     {
@@ -429,7 +429,7 @@
         "Next steps ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-21T21:00:07+00:00",
+      "checked_at": "2026-10-22T10:16:22+00:00",
       "status": "ok"
     },
     {
@@ -455,7 +455,7 @@
         "Results",
         "References"
       ],
-      "checked_at": "2026-10-21T21:00:07+00:00",
+      "checked_at": "2026-10-22T10:16:22+00:00",
       "status": "ok"
     },
     {
@@ -485,7 +485,7 @@
         "Playback ​",
         "Canvas ​"
       ],
-      "checked_at": "2026-10-21T21:00:08+00:00",
+      "checked_at": "2026-10-22T10:16:22+00:00",
       "status": "ok"
     },
     {
@@ -499,11 +499,15 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/captions | Remotion",
+      "online_description": "The @remotion/captions package provides utilities for dealing with subtitles.",
+      "online_headings": [
+        "@remotion/captions v 4.0.216",
+        "APIs ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-22T10:16:22+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-effects-api",
@@ -516,11 +520,18 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/effects | Remotion",
+      "online_description": "Effects that can be applied to Remotion-based canvas components.",
+      "online_headings": [
+        "@remotion/effects v 4.0.464",
+        "Supported components ​",
+        "Effect resolution v 4.0.536 ​",
+        "Effects ​",
+        "Creating custom effects ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-22T10:16:22+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-fonts-api",
@@ -533,11 +544,15 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/fonts | Remotion",
+      "online_description": "The @remotion/fonts package provides an API for loading local fonts or remote fonts from a URL into a Remotion component.",
+      "online_headings": [
+        "@remotion/fonts",
+        "Installation ​",
+        "APIs ​"
+      ],
+      "checked_at": "2026-10-22T10:16:23+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-google-fonts",
@@ -546,6 +561,82 @@
       "tags": [
         "google",
         "fonts"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": "@remotion/google-fonts | Remotion",
+      "online_description": "One way of embedding fonts in Remotion is @remotion/google-fonts, sourcing fonts from Google Fonts.",
+      "online_headings": [
+        "@remotion/google-fonts",
+        "Installation ​",
+        "Usage ​",
+        "APIs ​",
+        "Troubleshooting ​",
+        "Credits ​",
+        "License ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-22T10:16:23+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "discovered-media",
+      "title": "Remotion documentation: media",
+      "url": "https://www.remotion.dev/docs/media",
+      "tags": [
+        "media"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-media-utils",
+      "title": "Remotion documentation: media utils",
+      "url": "https://www.remotion.dev/docs/media-utils",
+      "tags": [
+        "media",
+        "utils"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-motion-blur-api",
+      "title": "Remotion documentation: motion blur api",
+      "url": "https://www.remotion.dev/docs/motion-blur/api",
+      "tags": [
+        "motion",
+        "blur",
+        "api"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-renderer",
+      "title": "Remotion documentation: renderer",
+      "url": "https://www.remotion.dev/docs/renderer",
+      "tags": [
+        "renderer"
       ],
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
