@@ -223,8 +223,8 @@ class ProjectStore:
                 if duration < 15 or duration > 1800:
                     raise ValueError('Smart Reels принимает видео длительностью от 15 секунд до 30 минут.')
             if settings.get('ai_semantic') and editor_mode == 'reference':
-                if len(ids) > 3:
-                    raise ValueError('Первый AI-режим поддерживает до 3 исходников за один запуск.')
+                # Up to 32 items already enforced by the project's upload limits.
+                # Director breaks the candidate list into sets of 6 for Gemini.
                 selected = [state['reference'], *(assets[i] for i in ids)]
                 max_clip = 120 if settings.get('motion_design') else 60
                 if any(asset['metadata']['duration'] > max_clip for asset in selected):
