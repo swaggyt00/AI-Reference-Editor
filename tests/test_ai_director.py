@@ -53,8 +53,9 @@ class DirectorTests(unittest.TestCase):
     def test_pilot_budgets_enforced_before_api_calls(self):
         with patch("refeditor.ai_director.video_metadata", return_value={"duration": 10}):
             self.assertTrue(validate_budget("r.mp4", ["a.mp4", "b.mp4"], self.project["segments"]))
+            self.assertTrue(validate_budget("r.mp4", ["a", "b", "c", "d"], self.project["segments"]))
             with self.assertRaises(ValueError):
-                validate_budget("r.mp4", ["a", "b", "c", "d"], self.project["segments"])
+                validate_budget("r.mp4", ["a"] * 33, self.project["segments"])
         with patch("refeditor.ai_director.video_metadata", return_value={"duration": 61}):
             with self.assertRaises(ValueError):
                 validate_budget("r.mp4", ["a.mp4"], self.project["segments"])
