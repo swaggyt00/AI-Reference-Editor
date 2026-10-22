@@ -263,7 +263,7 @@ DATA:"""
     # Limit each final matching request to a manageable source set. Each
     # batch uses LOCAL source indices (0..5); remap them after validation.
     # This prevents both unbounded prompt growth and hallucinated source IDs.
-    client = get_client()
+    client = None  # Initialize only if an uncached batch needs an API request.
     proposed_graphics = {}
     candidates = []
     batch_count = (len(source_paths) + AI_DIRECTOR_BATCH_SIZE - 1) // AI_DIRECTOR_BATCH_SIZE
@@ -301,20 +301,39 @@ DATA:"""
             if progress:
                 progress(f"Gemini: сопоставление сцен, партия {batch_number+1}/{batch_count}",
                          36 + int(2 * batch_number / max(1, batch_count)))
-            response = call_with_overload_retry(
-                lambda: client.models.generate_content(
-                    model=model, contents=contents,
-                    config={"response_mime_type": "application/json", "temperature": 0.1}
-                ),
-                on_retry=(lambda count, code: progress(
-                    f"Gemini HTTP {code}: повтор партии {batch_number+1}/{batch_count}", 37
-                )) if progress else None
-            )
-            if not response.text:
-                raise RuntimeError(f"Gemini returned no edit plan in batch {batch_number+1}.")
-            proposal = json.loads(response.text)
-            if not isinstance(proposal, dict):
-                raise ValueError("Gemini edit-plan response must be a JSON object.")
+            # The prompt includes only the current sources, their cached
+            # descriptions, reference shot times, and the user's task.
+            # Completed batches survive 503 in any later batch.
+            key = hashlib.sha256((model + "\\n" + prompt).encode("utf-8")).hexdigest()[:24]
+            batch_cache = cache_dir / f"ai-director-batch-{key}.json"
+            proposal = None
+            if batch_cache.is_file():
+                try:
+                    cached = json.loads(batch_cache.read_text(encoding="utf-8"))
+                    if isinstance(cached, dict) and isinstance(cached.get("matches"), list):
+                        proposal = cached
+                except (ValueError, OSError):
+                    pass
+            if proposal is None:
+                if client is None:
+                    client = get_client()
+                response = call_with_overload_retry(
+                    lambda: client.models.generate_content(
+                        model=model, contents=contents,
+                        config={"response_mime_type": "application/json", "temperature": 0.1}
+                    ),
+                    on_retry=(lambda count, code: progress(
+                        f"Gemini HTTP {code}: повтор партии {batch_number+1}/{batch_count}", 37
+                    )) if progress else None
+                )
+                if not response.text:
+                    raise RuntimeError(f"Gemini returned no edit plan in batch {batch_number+1}.")
+                proposal = json.loads(response.text)
+                if not isinstance(proposal, dict) or not isinstance(proposal.get("matches"), list):
+                    raise ValueError("Gemini edit-plan response must contain a matches array.")
+                pending = batch_cache.with_suffix(".tmp")
+                pending.write_text(json.dumps(proposal, ensure_ascii=False), encoding="utf-8")
+                pending.replace(batch_cache)
             if batch_number == 0:
                 proposed_graphics = proposal
             # Check local bounds first; only then translate into global indices.
@@ -322,7 +341,8 @@ DATA:"""
             for item in local_matches:
                 candidates.append({**item, "source_index": item["source_index"] + offset})
     finally:
-        client.close()
+        if client is not None:
+            client.close()
     # Across batches, choose the highest-confidence candidate for each shot.
     # Stable tie breaks preserve the earlier source group.
     best_by_shot = {}
