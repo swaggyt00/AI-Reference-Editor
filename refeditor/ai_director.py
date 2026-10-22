@@ -304,7 +304,12 @@ DATA:"""
             # The prompt includes only the current sources, their cached
             # descriptions, reference shot times, and the user's task.
             # Completed batches survive 503 in any later batch.
-            key = hashlib.sha256((model + "\\n" + prompt).encode("utf-8")).hexdigest()[:24]
+            key_material = json.dumps({
+                "model": model, "reference": str(Path(reference_path).resolve()),
+                "sources": [str(Path(p).resolve()) for p in batch_sources],
+                "prompt": prompt
+            }, ensure_ascii=False, sort_keys=True)
+            key = hashlib.sha256(key_material.encode("utf-8")).hexdigest()[:24]
             batch_cache = cache_dir / f"ai-director-batch-{key}.json"
             proposal = None
             if batch_cache.is_file():
