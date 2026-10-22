@@ -72,6 +72,38 @@ class MultiSourceBatchTest(unittest.TestCase):
         self.assertEqual(plan['sources_analyzed'],32)
         self.assertEqual(client.models.generate_content.call_count,6)
 
+    def test_completed_matching_batch_is_cached_across_next_batch_failure(self):
+        import unittest.mock as um
+        project1=self.project(8)
+        project2=self.project(8)
+        first=type('Resp', (), {'text':json.dumps({
+            'matches':[{'shot_index':0,'source_index':2,'confidence':.95,
+                        'source_start_s':1,'reason':'ok'}]
+        })})()
+        final=type('Resp', (), {'text':json.dumps({'matches':[]})})()
+        failed_client=MagicMock()
+        failed_client.models.generate_content.side_effect=[first,RuntimeError('503 mock')]
+        success_client=MagicMock()
+        success_client.models.generate_content.return_value=final
+        fake_data={'analysis':{'summary':'cached scene'}}
+        with tempfile.TemporaryDirectory() as folder, \
+             patch('refeditor.ai_director.video_metadata',return_value={'duration':20}), \
+             patch('refeditor.ai_director._get_or_analyze',return_value=fake_data), \
+             patch('refeditor.ai_director.call_with_overload_retry',
+                   side_effect=lambda operation,**kwargs:operation()), \
+             patch('refeditor.ai_director.get_client',
+                   side_effect=[failed_client,success_client]):
+            with self.assertRaisesRegex(RuntimeError,'503 mock'):
+                run_ai_scene_matching(project1,'/mock/reference.mp4',
+                                       project1['source_files'],Path(folder))
+            cache=list(Path(folder).glob('ai-director-batch-*.json'))
+            self.assertEqual(len(cache),1)
+            plan=run_ai_scene_matching(project2,'/mock/reference.mp4',
+                                        project2['source_files'],Path(folder))
+            self.assertEqual(success_client.models.generate_content.call_count,1)
+            self.assertEqual(plan['director_batches'],2)
+            self.assertEqual(project2['segments'][0]['source_index'],2)
+
     def test_budget_keeps_duration_check_but_removes_three_clip_cap(self):
         with patch('refeditor.ai_director.video_metadata',return_value={'duration':20}):
             self.assertTrue(validate_budget('reference',['clip']*32,[{}]))
