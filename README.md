@@ -26,6 +26,28 @@ No media is uploaded to GitHub. Any compressed video proxies sent to Google
 require the existing consent checkbox. The batch mode changes the existing AI
 reference matching only; Smart Reels still takes one long input clip.
 
+## Gemini connection reset / RemoteProtocolError recovery
+
+If Google, a proxy, or the network drops the transport connection before
+Gemini answers, HTTPX may raise `RemoteProtocolError` (different from HTTP
+503 and unrelated to an API-key failure). The editor now:
+- retries **repeatable Gemini content and file-status read calls** at most
+  twice more after a transport failure, with short bounded backoff;
+- continues to use the **previously cached reference/source analyses and
+  completed 6-clip director matching batches** when the user retries the same
+  project;
+- displays the exact failing phase (proxy upload, remote processing,
+  semantic analysis, scene-matching batch, or Smart Reels);
+- never automatically repeats a potentially already accepted **file upload**,
+  which could leave duplicate video files in Google's temporary Files API.
+  If upload disconnects, retry the job manually in the same project.
+
+There is no automatic model fallback or automatic re-upload after ambiguous
+network errors. If it fails repeatedly on the same connection, check the
+VPN/proxy and the local server's stack trace (without sharing keys). The
+network path on a user's Windows machine cannot be exercised in GitHub CI;
+offline tests inject HTTPX RemoteProtocolError and verify retries and messages.
+
 ## Gemini 503 recovery and explicit model choice
 
 A Gemini 503/502/504 is normally a temporary Google server overload. Official

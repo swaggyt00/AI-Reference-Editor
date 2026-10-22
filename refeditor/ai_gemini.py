@@ -13,9 +13,18 @@ import subprocess
 import tempfile
 import time
 
-from .ai_resilience import DEFAULT_MODEL, call_with_overload_retry, status_code
+from .ai_resilience import (DEFAULT_MODEL, call_with_overload_retry, status_code,
+                            is_transient_network_error, GeminiStepFailure, root_cause)
 
 def safe_error_reason(exc):
+    """Sanitized stage-aware explanation; never expose HTTP request or key."""
+    step = exc.stage if isinstance(exc, GeminiStepFailure) else None
+    underlying = root_cause(exc)
+    reason = _safe_error_detail(underlying)
+    return ("На этапе «" + step + "»: " + reason) if step else reason
+
+
+def _safe_error_detail(exc):
     """Render safe actionable error text. Never include API keys or request bodies."""
     own_reasons = {
         "Gemini API key not configured. Run configure-gemini.cmd first.",
@@ -51,9 +60,17 @@ def safe_error_reason(exc):
                 "). Повторы SDK и агента исчерпаны. Попробуйте повторить рендер "
                 "в этом же проекте или вручную выбрать другую модель Gemini. "
                 "Готовые этапы AI-анализа сохранены.")
+    if is_transient_network_error(exc):
+        return ("Сетевое соединение с Gemini было прервано ("
+                + type(exc).__name__ + "). Все ограниченные повторы исчерпаны. "
+                "Это не ошибка API-ключа. Попробуйте повторить рендер "
+                "в том же проекте: завершённый анализ сохраняется. "
+                "Если повторяется, проверьте VPN, прокси и стабильность сети.")
     if isinstance(exc, (ConnectionError, TimeoutError, OSError)):
-        return "Network/TLS error. Check internet, VPN, proxy, and Windows certificate settings."
-    return "Unexpected error (" + type(exc).__name__ + "). Check the local key first using ai-check --local-only."
+        return ("Ошибка сетевого соединения или ожидания ответа. "
+                "Проверьте сеть, VPN или прокси и повторите в том же проекте.")
+    return ("Непредвиденная ошибка AI (" + type(exc).__name__
+            + "). Подробности находятся в чёрном окне сервера.")
 
 
 def load_api_key(project_root=None):
@@ -167,14 +184,23 @@ def analyze_video(video, output, *, role="reference", model=DEFAULT_MODEL,
     with tempfile.TemporaryDirectory(prefix="refeditor-gemini-") as temp:
         proxy = _encode_preview(source, Path(temp) / "preview.mp4")
         try:
-            remote_file = client.files.upload(file=str(proxy), config={"mime_type": "video/mp4"})
+            try:
+                remote_file = client.files.upload(file=str(proxy), config={"mime_type": "video/mp4"})
+            except Exception as exc:
+                # Do not blindly retry uploads: server may already have the file.
+                raise GeminiStepFailure("отправка сжатого видео в Google") from exc
             deadline = time.monotonic() + 240
             while getattr(getattr(remote_file, "state", None), "name", None) == "PROCESSING":
                 if time.monotonic() > deadline:
                     raise TimeoutError("Gemini upload processing exceeded 4 minutes.")
                 time.sleep(3)
-                remote_file = call_with_overload_retry(
-                    lambda: client.files.get(name=remote_file.name))
+                try:
+                    remote_file = call_with_overload_retry(
+                        lambda: client.files.get(name=remote_file.name),
+                        on_retry=on_retry
+                    )
+                except Exception as exc:
+                    raise GeminiStepFailure("проверка обработки загруженного видео") from exc
             state = getattr(getattr(remote_file, "state", None), "name", None)
             if state != "ACTIVE":
                 raise RuntimeError(f"Gemini Files API returned state {state!r}.")
@@ -191,12 +217,15 @@ You must separate native camera/actor movement from post-production effects.
 If unsure, say unknown, do not invent effects or scenes.
 Timestamps and effect candidates are approximations, NOT frame-accurate measurements.
 Do not propose effects absent from the actual video."""
-            response = call_with_overload_retry(
-                lambda: client.models.generate_content(
-                    model=model, contents=[remote_file, prompt],
-                    config={"response_mime_type": "application/json", "temperature": 0.1}
-                ), on_retry=on_retry
-            )
+            try:
+                response = call_with_overload_retry(
+                    lambda: client.models.generate_content(
+                        model=model, contents=[remote_file, prompt],
+                        config={"response_mime_type": "application/json", "temperature": 0.1}
+                    ), on_retry=on_retry
+                )
+            except Exception as exc:
+                raise GeminiStepFailure("распознавание содержимого видео") from exc
             if not response.text:
                 raise RuntimeError("Gemini returned an empty analysis.")
             try:

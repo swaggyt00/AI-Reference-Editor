@@ -11,7 +11,7 @@ from pathlib import Path
 import hashlib
 
 from .ai_gemini import DEFAULT_MODEL, analyze_video, get_client
-from .ai_resilience import call_with_overload_retry
+from .ai_resilience import call_with_overload_retry, GeminiStepFailure, retry_label
 from .analyzer import video_metadata
 
 AI_MAX_SOURCES = 32
@@ -132,7 +132,7 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
     ref_data = _get_or_analyze(
         reference_path, cache_dir / "ai-reference.json", "reference", model,
         on_retry=(lambda count, code: progress(
-            f"Gemini HTTP {code}: повтор анализа референса {count}/1", 33
+            f"Gemini {retry_label(code)}: повтор анализа референса {count}/{2 if code == 'network' else 1}", 33
         )) if progress else None
     )
     sources_data = []
@@ -143,7 +143,7 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
         data = _get_or_analyze(
             src, cache_dir / f"ai-source-{media_key}.json", "source", model,
             on_retry=(lambda count, code: progress(
-                f"Gemini HTTP {code}: повтор анализа исходника {idx+1}/{len(source_paths)}", 35
+                f"Gemini {retry_label(code)}: повтор исходника {idx+1}/{len(source_paths)}, попытка {count}/{2 if code == 'network' else 1}", 35
             )) if progress else None
         )
         sources_data.append(data)
@@ -322,15 +322,20 @@ DATA:"""
             if proposal is None:
                 if client is None:
                     client = get_client()
-                response = call_with_overload_retry(
-                    lambda: client.models.generate_content(
-                        model=model, contents=contents,
-                        config={"response_mime_type": "application/json", "temperature": 0.1}
-                    ),
-                    on_retry=(lambda count, code: progress(
-                        f"Gemini HTTP {code}: повтор партии {batch_number+1}/{batch_count}", 37
-                    )) if progress else None
-                )
+                try:
+                    response = call_with_overload_retry(
+                        lambda: client.models.generate_content(
+                            model=model, contents=contents,
+                            config={"response_mime_type": "application/json", "temperature": 0.1}
+                        ),
+                        on_retry=(lambda count, code: progress(
+                            f"Gemini {retry_label(code)}: повтор партии {batch_number+1}/{batch_count}, попытка {count}/{2 if code == 'network' else 1}", 37
+                        )) if progress else None
+                    )
+                except Exception as exc:
+                    raise GeminiStepFailure(
+                        f"построение монтажного плана, партия {batch_number+1} из {batch_count}"
+                    ) from exc
                 if not response.text:
                     raise RuntimeError(f"Gemini returned no edit plan in batch {batch_number+1}.")
                 proposal = json.loads(response.text)

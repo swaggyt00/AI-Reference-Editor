@@ -93,7 +93,7 @@ class MultiSourceBatchTest(unittest.TestCase):
                    side_effect=lambda operation,**kwargs:operation()), \
              patch('refeditor.ai_director.get_client',
                    side_effect=[failed_client,success_client]):
-            with self.assertRaisesRegex(RuntimeError,'503 mock'):
+            with self.assertRaisesRegex(RuntimeError,'построение монтажного плана, партия 2 из 2'):
                 run_ai_scene_matching(project1,'/mock/reference.mp4',
                                        project1['source_files'],Path(folder))
             cache=list(Path(folder).glob('ai-director-batch-*.json'))
