@@ -286,9 +286,9 @@ DATA:"""
             # resend storyboard pixels N times or duplicate visual graphics.
             request_instructions = director_instructions
             if batch_number:
-                request_instructions += (
-                    "\\nBATCH MODE: Return ONLY the matches array. No graphics, "
-                    "motion_layers, graphic_crops, or titles in this batch."
+                request_instructions = director_instructions.removesuffix("DATA:") + (
+                    "\nBATCH MODE: Return ONLY the matches array. No graphics, "
+                    "motion_layers, graphic_crops, or titles in this batch.\nDATA:"
                 )
             prompt = request_instructions + json.dumps(batch_context, ensure_ascii=False)
             contents = prompt
