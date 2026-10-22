@@ -1,5 +1,31 @@
 # AI Reference Editor — Codex MVP
 
+## Multiple AI source clips — 32 sources, batched scene matching
+
+Reference Clone + Gemini now supports **1–32 source clips** (the local project's
+existing media count limit), no longer just three. Each source is analyzed
+individually and reusable summaries are cached by uploaded media ID.
+The scene-matching director then uses **batches of six source descriptions**,
+validates source indices within each batch, maps matches back to the global
+timeline and selects the highest-confidence candidate for each reference shot.
+Graphics proposals and storyboard sheets are sent only in the first batch to
+avoid duplicating unnecessary image-token usage. Finished matching batches
+are stored in the same project's local cache: retries after HTTP 503 can resume
+from the missing batch without re-requesting completed ones.
+
+**Costs/limits:** Large source selections can require up to *N+1 video analysis
+requests* (lower with cached summaries) and *ceil(N/6) director matching calls*.
+Google API quotas and input-token charges can apply; an explicit confirmation
+before processing shows the selected source count and estimated request count.
+The existing 60-second per-clip AI analysis limit (120 seconds with Motion
+Design), 10GB project storage budget and project-level 32-source limit remain.
+If you need longer input clips or a larger library, those are separate features;
+no silent AI clipping is performed.
+
+No media is uploaded to GitHub. Any compressed video proxies sent to Google
+require the existing consent checkbox. The batch mode changes the existing AI
+reference matching only; Smart Reels still takes one long input clip.
+
 ## Gemini 503 recovery and explicit model choice
 
 A Gemini 503/502/504 is normally a temporary Google server overload. Official

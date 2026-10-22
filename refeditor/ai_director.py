@@ -14,7 +14,8 @@ from .ai_gemini import DEFAULT_MODEL, analyze_video, get_client
 from .ai_resilience import call_with_overload_retry
 from .analyzer import video_metadata
 
-AI_MAX_SOURCES = 3
+AI_MAX_SOURCES = 32
+AI_DIRECTOR_BATCH_SIZE = 6
 AI_MAX_CLIP_SECONDS = 60
 AI_MAX_SCENES = 12
 AI_MIN_CONFIDENCE = .65
@@ -23,7 +24,7 @@ AI_MIN_CONFIDENCE = .65
 def validate_budget(reference, sources, segments, *, motion_design=False):
     """Hard, stated pilot limits; longer reference only for explicit Motion Design."""
     if not (1 <= len(sources) <= AI_MAX_SOURCES):
-        raise ValueError("AI pilot supports up to three source videos per render.")
+        raise ValueError("AI-режим поддерживает от 1 до 32 исходников за монтаж. Источники анализируются партиями по 6.")
     max_scenes = 40 if motion_design else AI_MAX_SCENES
     if len(segments) > max_scenes:
         raise ValueError("AI reference has too many distinct shots for this pilot.")
@@ -191,7 +192,7 @@ def run_ai_scene_matching(project, reference_path, source_paths, cache_dir, *,
         context["visual_storyboard"] = frame_index
         if progress:
             progress("Gemini: изучение кадров и графики", 37)
-    prompt = """You are a senior video-editing SOURCE MATCHER, not a video generator.
+    director_instructions = """You are a senior video-editing SOURCE MATCHER, not a video generator.
 Given reference shots and descriptions of DIFFERENT source footage, select the
 best matching source and SOURCE START TIME for each shot.
 Match concrete subjects, actions, locations, poses and camera composition.
@@ -258,36 +259,105 @@ never invent missing inserts, and do not copy external text into subtitles.
 
 The matching confidence is between 0 and 1, under 0.65 means uncertain.
 Do not suggest adding generic flashy transitions when absent in the reference.
-DATA: """ + json.dumps(context, ensure_ascii=False)
-    if progress:
-        progress("Gemini: сопоставление сцен", 37)
-    client = get_client()
+DATA:"""
+    # Limit each final matching request to a manageable source set. Each
+    # batch uses LOCAL source indices (0..5); remap them after validation.
+    # This prevents both unbounded prompt growth and hallucinated source IDs.
+    client = None  # Initialize only if an uncached batch needs an API request.
+    proposed_graphics = {}
+    candidates = []
+    batch_count = (len(source_paths) + AI_DIRECTOR_BATCH_SIZE - 1) // AI_DIRECTOR_BATCH_SIZE
     try:
-        contents = prompt
-        if storyboards:
-            from google.genai import types
-            contents = [prompt] + [
-                types.Part.from_bytes(data=Path(p).read_bytes(),mime_type="image/jpeg")
-                for p in storyboards
+        for batch_number, offset in enumerate(range(0, len(source_paths), AI_DIRECTOR_BATCH_SIZE)):
+            batch_sources = source_paths[offset:offset + AI_DIRECTOR_BATCH_SIZE]
+            batch_durations = source_durations[offset:offset + AI_DIRECTOR_BATCH_SIZE]
+            batch_context = dict(context)
+            batch_context["source_descriptions"] = [
+                {"source_index": local_index, "duration_s": batch_durations[local_index],
+                 "description": _summary(sources_data[offset + local_index])}
+                for local_index in range(len(batch_sources))
             ]
-        response = call_with_overload_retry(
-            lambda: client.models.generate_content(
-                model=model, contents=contents,
-                config={"response_mime_type": "application/json", "temperature": 0.1}
-            ),
-            on_retry=(lambda count, code: progress(
-                f"Gemini HTTP {code}: повтор монтажного плана {count}/1", 37
-            )) if progress else None
-        )
-        if not response.text:
-            raise RuntimeError("Gemini returned no edit-plan proposal.")
-        proposed = json.loads(response.text)
-        if not isinstance(proposed, dict):
-            raise ValueError("Gemini edit-plan response must be a JSON object.")
+            batch_context["source_index_scope"] = (
+                f"ONLY source_index 0 through {len(batch_sources)-1} WITHIN THIS BATCH. "
+                "These are not original project indices; do not guess sources outside this batch."
+            )
+            # The first director call also observes titles/motion from reference.
+            # Subsequent calls strictly match more source candidates; no need to
+            # resend storyboard pixels N times or duplicate visual graphics.
+            request_instructions = director_instructions
+            if batch_number:
+                request_instructions = director_instructions.removesuffix("DATA:") + (
+                    "\nBATCH MODE: Return ONLY the matches array. No graphics, "
+                    "motion_layers, graphic_crops, or titles in this batch.\nDATA:"
+                )
+            prompt = request_instructions + json.dumps(batch_context, ensure_ascii=False)
+            contents = prompt
+            if storyboards and batch_number == 0:
+                from google.genai import types
+                contents = [prompt] + [
+                    types.Part.from_bytes(data=Path(p).read_bytes(), mime_type="image/jpeg")
+                    for p in storyboards
+                ]
+            if progress:
+                progress(f"Gemini: сопоставление сцен, партия {batch_number+1}/{batch_count}",
+                         36 + int(2 * batch_number / max(1, batch_count)))
+            # The prompt includes only the current sources, their cached
+            # descriptions, reference shot times, and the user's task.
+            # Completed batches survive 503 in any later batch.
+            key_material = json.dumps({
+                "model": model, "reference": str(Path(reference_path).resolve()),
+                "sources": [str(Path(p).resolve()) for p in batch_sources],
+                "prompt": prompt
+            }, ensure_ascii=False, sort_keys=True)
+            key = hashlib.sha256(key_material.encode("utf-8")).hexdigest()[:24]
+            batch_cache = cache_dir / f"ai-director-batch-{key}.json"
+            proposal = None
+            if batch_cache.is_file():
+                try:
+                    cached = json.loads(batch_cache.read_text(encoding="utf-8"))
+                    if isinstance(cached, dict) and isinstance(cached.get("matches"), list):
+                        proposal = cached
+                except (ValueError, OSError):
+                    pass
+            if proposal is None:
+                if client is None:
+                    client = get_client()
+                response = call_with_overload_retry(
+                    lambda: client.models.generate_content(
+                        model=model, contents=contents,
+                        config={"response_mime_type": "application/json", "temperature": 0.1}
+                    ),
+                    on_retry=(lambda count, code: progress(
+                        f"Gemini HTTP {code}: повтор партии {batch_number+1}/{batch_count}", 37
+                    )) if progress else None
+                )
+                if not response.text:
+                    raise RuntimeError(f"Gemini returned no edit plan in batch {batch_number+1}.")
+                proposal = json.loads(response.text)
+                if not isinstance(proposal, dict) or not isinstance(proposal.get("matches"), list):
+                    raise ValueError("Gemini edit-plan response must contain a matches array.")
+                pending = batch_cache.with_suffix(".tmp")
+                pending.write_text(json.dumps(proposal, ensure_ascii=False), encoding="utf-8")
+                pending.replace(batch_cache)
+            if batch_number == 0:
+                proposed_graphics = proposal
+            # Check local bounds first; only then translate into global indices.
+            local_matches = validate_matches(proposal, project, batch_durations)
+            for item in local_matches:
+                candidates.append({**item, "source_index": item["source_index"] + offset})
     finally:
-        client.close()
-    valid = validate_matches(proposed, project, source_durations)
+        if client is not None:
+            client.close()
+    # Across batches, choose the highest-confidence candidate for each shot.
+    # Stable tie breaks preserve the earlier source group.
+    best_by_shot = {}
+    for candidate in candidates:
+        shot = candidate["shot_index"]
+        if shot not in best_by_shot or candidate["confidence"] > best_by_shot[shot]["confidence"]:
+            best_by_shot[shot] = candidate
+    valid = list(best_by_shot.values())
     applied = apply_validated_matches(project, valid)
+    proposed = proposed_graphics
     observations = proposed.get("observed_effects", [])
     limitations = proposed.get("limitations", [])
     plan = {
@@ -295,7 +365,10 @@ DATA: """ + json.dumps(context, ensure_ascii=False)
         "semantic_matches_applied": applied,
         "effect_observations": observations[:25] if isinstance(observations, list) else [],
         "limitations": limitations[:25] if isinstance(limitations, list) else [],
-        "effect_execution": "NOT enabled: observations require frame-accurate validation"
+        "effect_execution": "NOT enabled: observations require frame-accurate validation",
+        "sources_analyzed": len(source_paths),
+        "director_batches": batch_count,
+        "batch_size": AI_DIRECTOR_BATCH_SIZE,
     }
     # Keep only supported, bounded, high-confidence graphics; low-confidence
     # Gemini observations never cause accidental decorative overlays.
