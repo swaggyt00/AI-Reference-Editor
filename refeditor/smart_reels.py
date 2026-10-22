@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 
 from .ai_gemini import DEFAULT_MODEL, _encode_preview, get_client
-from .ai_resilience import call_with_overload_retry
+from .ai_resilience import call_with_overload_retry, GeminiStepFailure
 from .analyzer import video_metadata
 
 
@@ -85,15 +85,21 @@ def propose_highlights(source, target_seconds=60, brief="", model=DEFAULT_MODEL)
     try:
         with tempfile.TemporaryDirectory(prefix="refeditor-smart-proxy-") as temp:
             proxy = _encode_preview(source, Path(temp) / "overview.mp4")
-            remote = client.files.upload(file=str(proxy), config={"mime_type": "video/mp4"})
+            try:
+                remote = client.files.upload(file=str(proxy), config={"mime_type": "video/mp4"})
+            except Exception as exc:
+                raise GeminiStepFailure("загрузка Smart Reels в Gemini") from exc
             import time
             deadline = time.monotonic() + 360
             while getattr(getattr(remote, "state", None), "name", None) == "PROCESSING":
                 if time.monotonic() > deadline:
                     raise TimeoutError("Gemini Files API processing timeout")
                 time.sleep(4)
-                remote = call_with_overload_retry(
-                    lambda: client.files.get(name=remote.name))
+                try:
+                    remote = call_with_overload_retry(
+                        lambda: client.files.get(name=remote.name))
+                except Exception as exc:
+                    raise GeminiStepFailure("проверка видео Smart Reels") from exc
             if getattr(getattr(remote, "state", None), "name", None) != "ACTIVE":
                 raise RuntimeError("Gemini remote video was not ready for analysis")
             # Optional tiny public docs index, never the user's footage.
@@ -123,12 +129,15 @@ Provide enough distinct clips totaling {target_seconds} seconds, each normally
 coherent narrative progression. Timestamps refer to the ORIGINAL source file.
 Do not hallucinate words or events. If no good highlights are present, say so
 by returning fewer or no highlights. Timing is approximate and needs human review."""
-            response = call_with_overload_retry(
-                lambda: client.models.generate_content(
-                    model=model, contents=[remote, prompt],
-                    config={"response_mime_type": "application/json", "temperature": 0.15}
+            try:
+                response = call_with_overload_retry(
+                    lambda: client.models.generate_content(
+                        model=model, contents=[remote, prompt],
+                        config={"response_mime_type": "application/json", "temperature": 0.15}
+                    )
                 )
-            )
+            except Exception as exc:
+                raise GeminiStepFailure("поиск интересных моментов Smart Reels") from exc
             if not response.text:
                 raise ValueError("Gemini returned an empty highlight proposal")
             plan = json.loads(response.text)
