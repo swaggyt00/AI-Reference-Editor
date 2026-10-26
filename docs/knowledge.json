@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-22T10:16:23+00:00",
+  "generated_at": "2026-10-26T11:11:06+00:00",
   "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
   "sources": [
     {
@@ -28,7 +28,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:10+00:00",
+      "checked_at": "2026-10-26T11:10:46+00:00",
       "status": "ok"
     },
     {
@@ -58,7 +58,7 @@
         "Rules ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:10+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -89,7 +89,7 @@
         "Example: CSS transform values v 4.0.472 ​",
         "Example: Discrete string values v 4.0.509 ​"
       ],
-      "checked_at": "2026-10-22T10:16:10+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -117,7 +117,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:10+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -141,7 +141,7 @@
         "Captions",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:10+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -168,7 +168,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:10+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -194,7 +194,7 @@
         "Working with large files ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:11+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -217,7 +217,7 @@
         "Using audio",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:11+00:00",
+      "checked_at": "2026-10-26T11:10:47+00:00",
       "status": "ok"
     },
     {
@@ -266,7 +266,7 @@
         "Lucas-Kanade Optical Flow in OpenCV",
         "Dense Optical Flow in OpenCV"
       ],
-      "checked_at": "2026-10-22T10:16:20+00:00",
+      "checked_at": "2026-10-26T11:11:03+00:00",
       "status": "ok"
     },
     {
@@ -291,7 +291,7 @@
         "Template Matching in OpenCV",
         "Template Matching with Multiple Objects"
       ],
-      "checked_at": "2026-10-22T10:16:20+00:00",
+      "checked_at": "2026-10-26T11:11:03+00:00",
       "status": "ok"
     },
     {
@@ -320,7 +320,7 @@
         "Technical details about videos",
         "What's next"
       ],
-      "checked_at": "2026-10-22T10:16:21+00:00",
+      "checked_at": "2026-10-26T11:11:04+00:00",
       "status": "ok"
     },
     {
@@ -346,7 +346,7 @@
         "Trail ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:04+00:00",
       "status": "ok"
     },
     {
@@ -371,7 +371,7 @@
         "Functions ​",
         "License ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:04+00:00",
       "status": "ok"
     },
     {
@@ -400,7 +400,7 @@
         "Animation helpers ​",
         "Full projects ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:04+00:00",
       "status": "ok"
     },
     {
@@ -429,7 +429,7 @@
         "Next steps ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:04+00:00",
       "status": "ok"
     },
     {
@@ -455,7 +455,7 @@
         "Results",
         "References"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:04+00:00",
       "status": "ok"
     },
     {
@@ -485,7 +485,7 @@
         "Playback ​",
         "Canvas ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:05+00:00",
       "status": "ok"
     },
     {
@@ -506,7 +506,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:05+00:00",
       "status": "ok"
     },
     {
@@ -530,7 +530,7 @@
         "Creating custom effects ​",
         "License ​"
       ],
-      "checked_at": "2026-10-22T10:16:22+00:00",
+      "checked_at": "2026-10-26T11:11:05+00:00",
       "status": "ok"
     },
     {
@@ -551,7 +551,7 @@
         "Installation ​",
         "APIs ​"
       ],
-      "checked_at": "2026-10-22T10:16:23+00:00",
+      "checked_at": "2026-10-26T11:11:05+00:00",
       "status": "ok"
     },
     {
@@ -577,7 +577,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-22T10:16:23+00:00",
+      "checked_at": "2026-10-26T11:11:05+00:00",
       "status": "ok"
     },
     {
@@ -590,11 +590,16 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/media | Remotion",
+      "online_description": "This package provides the recommended ` and ` tags for embedding video and audio in Remotion.",
+      "online_headings": [
+        "@remotion/media",
+        "ProRes ​",
+        "Components ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-26T11:11:05+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-media-utils",
@@ -607,11 +612,15 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/media-utils | Remotion",
+      "online_description": "A package providing utility functions for getting information about video and audio, and for visualizing audio.",
+      "online_headings": [
+        "@remotion/media-utils",
+        "Functions ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-26T11:11:06+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-motion-blur-api",
@@ -625,11 +634,15 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/motion-blur | Remotion",
+      "online_description": "Higher order components that create motion blur and trail effects.",
+      "online_headings": [
+        "@remotion/motion-blur v 3.2.31",
+        "Components ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-26T11:11:06+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-renderer",
@@ -637,6 +650,86 @@
       "url": "https://www.remotion.dev/docs/renderer",
       "tags": [
         "renderer"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": "@remotion/renderer | Remotion",
+      "online_description": "The @remotion/renderer package provides APIs for rendering video server-side.",
+      "online_headings": [
+        "@remotion/renderer",
+        "Installation ​",
+        "Server-side rendering examples ​",
+        "Available functions ​",
+        "What's the difference between renderMedia() and renderFrames() ? ​"
+      ],
+      "checked_at": "2026-10-26T11:11:06+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "discovered-rounded-text-box",
+      "title": "Remotion documentation: rounded text box",
+      "url": "https://www.remotion.dev/docs/rounded-text-box",
+      "tags": [
+        "rounded",
+        "text",
+        "box"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-transitionseries",
+      "title": "Remotion documentation: transitions transitionseries",
+      "url": "https://www.remotion.dev/docs/transitions/transitionseries",
+      "tags": [
+        "transitions",
+        "transitionseries"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-use-transition-progress",
+      "title": "Remotion documentation: transitions use transition progress",
+      "url": "https://www.remotion.dev/docs/transitions/use-transition-progress",
+      "tags": [
+        "transitions",
+        "use",
+        "transition",
+        "progress"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-make-html-in-canvas-presentation",
+      "title": "Remotion documentation: transitions make html in canvas presentation",
+      "url": "https://www.remotion.dev/docs/transitions/make-html-in-canvas-presentation",
+      "tags": [
+        "transitions",
+        "make",
+        "html",
+        "canvas",
+        "presentation"
       ],
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
