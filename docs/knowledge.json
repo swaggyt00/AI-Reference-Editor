@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-26T11:11:06+00:00",
+  "generated_at": "2026-10-29T11:34:26+00:00",
   "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
   "sources": [
     {
@@ -28,7 +28,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:46+00:00",
+      "checked_at": "2026-10-29T11:34:06+00:00",
       "status": "ok"
     },
     {
@@ -58,7 +58,7 @@
         "Rules ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:06+00:00",
       "status": "ok"
     },
     {
@@ -89,7 +89,7 @@
         "Example: CSS transform values v 4.0.472 ​",
         "Example: Discrete string values v 4.0.509 ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:06+00:00",
       "status": "ok"
     },
     {
@@ -117,7 +117,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:07+00:00",
       "status": "ok"
     },
     {
@@ -141,7 +141,7 @@
         "Captions",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:07+00:00",
       "status": "ok"
     },
     {
@@ -168,7 +168,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:07+00:00",
       "status": "ok"
     },
     {
@@ -194,7 +194,7 @@
         "Working with large files ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:07+00:00",
       "status": "ok"
     },
     {
@@ -217,7 +217,7 @@
         "Using audio",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:10:47+00:00",
+      "checked_at": "2026-10-29T11:34:08+00:00",
       "status": "ok"
     },
     {
@@ -266,7 +266,7 @@
         "Lucas-Kanade Optical Flow in OpenCV",
         "Dense Optical Flow in OpenCV"
       ],
-      "checked_at": "2026-10-26T11:11:03+00:00",
+      "checked_at": "2026-10-29T11:34:21+00:00",
       "status": "ok"
     },
     {
@@ -291,7 +291,7 @@
         "Template Matching in OpenCV",
         "Template Matching with Multiple Objects"
       ],
-      "checked_at": "2026-10-26T11:11:03+00:00",
+      "checked_at": "2026-10-29T11:34:21+00:00",
       "status": "ok"
     },
     {
@@ -320,7 +320,7 @@
         "Technical details about videos",
         "What's next"
       ],
-      "checked_at": "2026-10-26T11:11:04+00:00",
+      "checked_at": "2026-10-29T11:34:21+00:00",
       "status": "ok"
     },
     {
@@ -346,7 +346,7 @@
         "Trail ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:11:04+00:00",
+      "checked_at": "2026-10-29T11:34:22+00:00",
       "status": "ok"
     },
     {
@@ -371,7 +371,7 @@
         "Functions ​",
         "License ​"
       ],
-      "checked_at": "2026-10-26T11:11:04+00:00",
+      "checked_at": "2026-10-29T11:34:22+00:00",
       "status": "ok"
     },
     {
@@ -400,7 +400,7 @@
         "Animation helpers ​",
         "Full projects ​"
       ],
-      "checked_at": "2026-10-26T11:11:04+00:00",
+      "checked_at": "2026-10-29T11:34:22+00:00",
       "status": "ok"
     },
     {
@@ -429,7 +429,7 @@
         "Next steps ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:11:04+00:00",
+      "checked_at": "2026-10-29T11:34:22+00:00",
       "status": "ok"
     },
     {
@@ -455,7 +455,7 @@
         "Results",
         "References"
       ],
-      "checked_at": "2026-10-26T11:11:04+00:00",
+      "checked_at": "2026-10-29T11:34:23+00:00",
       "status": "ok"
     },
     {
@@ -485,7 +485,7 @@
         "Playback ​",
         "Canvas ​"
       ],
-      "checked_at": "2026-10-26T11:11:05+00:00",
+      "checked_at": "2026-10-29T11:34:23+00:00",
       "status": "ok"
     },
     {
@@ -506,7 +506,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-10-26T11:11:05+00:00",
+      "checked_at": "2026-10-29T11:34:23+00:00",
       "status": "ok"
     },
     {
@@ -530,7 +530,7 @@
         "Creating custom effects ​",
         "License ​"
       ],
-      "checked_at": "2026-10-26T11:11:05+00:00",
+      "checked_at": "2026-10-29T11:34:23+00:00",
       "status": "ok"
     },
     {
@@ -551,7 +551,7 @@
         "Installation ​",
         "APIs ​"
       ],
-      "checked_at": "2026-10-26T11:11:05+00:00",
+      "checked_at": "2026-10-29T11:34:24+00:00",
       "status": "ok"
     },
     {
@@ -577,7 +577,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-10-26T11:11:05+00:00",
+      "checked_at": "2026-10-29T11:34:24+00:00",
       "status": "ok"
     },
     {
@@ -598,7 +598,7 @@
         "Components ​",
         "License ​"
       ],
-      "checked_at": "2026-10-26T11:11:05+00:00",
+      "checked_at": "2026-10-29T11:34:24+00:00",
       "status": "ok"
     },
     {
@@ -619,7 +619,7 @@
         "Functions ​",
         "License ​"
       ],
-      "checked_at": "2026-10-26T11:11:06+00:00",
+      "checked_at": "2026-10-29T11:34:24+00:00",
       "status": "ok"
     },
     {
@@ -641,7 +641,7 @@
         "Components ​",
         "License ​"
       ],
-      "checked_at": "2026-10-26T11:11:06+00:00",
+      "checked_at": "2026-10-29T11:34:25+00:00",
       "status": "ok"
     },
     {
@@ -663,7 +663,7 @@
         "Available functions ​",
         "What's the difference between renderMedia() and renderFrames() ? ​"
       ],
-      "checked_at": "2026-10-26T11:11:06+00:00",
+      "checked_at": "2026-10-29T11:34:25+00:00",
       "status": "ok"
     },
     {
@@ -678,11 +678,15 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "@remotion/rounded-text-box | Remotion",
+      "online_description": "Create a TikTok-like multiline text box SVG path with rounded corners.",
+      "online_headings": [
+        "@remotion/rounded-text-box v 4.0.360",
+        "Functions ​",
+        "License ​"
+      ],
+      "checked_at": "2026-10-29T11:34:25+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-transitionseries",
@@ -695,11 +699,20 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "TransitionSeries component (@remotion/transitions) | Remotion",
+      "online_description": "The ` component behaves the same as the component, but allows for and components to be rendered between ` components.",
+      "online_headings": [
+        "TransitionSeries v 4.0.59",
+        "API ​",
+        "Enter and exit animations ​",
+        "Duration of a TransitionSeries ​",
+        "Getting the duration of a transition ​",
+        "Rules ​",
+        "Compatibility ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-29T11:34:25+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-use-transition-progress",
@@ -714,11 +727,16 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "useTransitionProgress() | Remotion",
+      "online_description": "A hook that can be used inside a child of a `` to get the progress of the transition to directly manipulate the objects inside the scene.",
+      "online_headings": [
+        "useTransitionProgress() v 4.0.177",
+        "Example ​",
+        "API ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-29T11:34:25+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-make-html-in-canvas-presentation",
@@ -730,6 +748,80 @@
         "html",
         "canvas",
         "presentation"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": "makeHtmlInCanvasPresentation() | Remotion",
+      "online_description": "Allows you to pass a shader to create a HTML-in-canvas-based @remotion/transitions presentation.",
+      "online_headings": [
+        "makeHtmlInCanvasPresentation() v 4.0.456",
+        "Arguments ​",
+        "Return value ​",
+        "Types ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-10-29T11:34:26+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "discovered-transitions-timings",
+      "title": "Remotion documentation: transitions timings",
+      "url": "https://www.remotion.dev/docs/transitions/timings",
+      "tags": [
+        "transitions",
+        "timings"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations",
+      "title": "Remotion documentation: transitions presentations",
+      "url": "https://www.remotion.dev/docs/transitions/presentations",
+      "tags": [
+        "transitions",
+        "presentations"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-video-matting",
+      "title": "Remotion documentation: video matting",
+      "url": "https://www.remotion.dev/docs/video-matting",
+      "tags": [
+        "video",
+        "matting"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-web-renderer",
+      "title": "Remotion documentation: web renderer",
+      "url": "https://www.remotion.dev/docs/web-renderer",
+      "tags": [
+        "web",
+        "renderer"
       ],
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
