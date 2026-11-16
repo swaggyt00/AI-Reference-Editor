@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-12T13:48:49+00:00",
+  "generated_at": "2026-11-16T13:42:56+00:00",
   "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
   "sources": [
     {
@@ -24,11 +24,11 @@
       "online_headings": [
         "@remotion/transitions v 4.0.53",
         "Installation ​",
-        "API ​",
+        "APIs ​",
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:40+00:00",
+      "checked_at": "2026-11-16T13:42:48+00:00",
       "status": "ok"
     },
     {
@@ -49,7 +49,7 @@
       "online_title": "Transitions | Remotion",
       "online_description": "The ` component lets you animate between absolutely positioned scenes. Between any two sequences, you can place a or a `.",
       "online_headings": [
-        "Transitions v 4.0.59",
+        "Transitions v 4.0.53",
         "Transitions ​",
         "Overlays v 4.0.415 ​",
         "Presentations ​",
@@ -58,7 +58,7 @@
         "Rules ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:40+00:00",
+      "checked_at": "2026-11-16T13:42:48+00:00",
       "status": "ok"
     },
     {
@@ -89,7 +89,7 @@
         "Example: CSS transform values v 4.0.472 ​",
         "Example: Discrete string values v 4.0.509 ​"
       ],
-      "checked_at": "2026-11-12T13:48:40+00:00",
+      "checked_at": "2026-11-16T13:42:48+00:00",
       "status": "ok"
     },
     {
@@ -117,7 +117,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:40+00:00",
+      "checked_at": "2026-11-16T13:42:48+00:00",
       "status": "ok"
     },
     {
@@ -141,7 +141,7 @@
         "Captions",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:40+00:00",
+      "checked_at": "2026-11-16T13:42:49+00:00",
       "status": "ok"
     },
     {
@@ -168,7 +168,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:40+00:00",
+      "checked_at": "2026-11-16T13:42:49+00:00",
       "status": "ok"
     },
     {
@@ -194,7 +194,7 @@
         "Working with large files ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:41+00:00",
+      "checked_at": "2026-11-16T13:42:49+00:00",
       "status": "ok"
     },
     {
@@ -221,7 +221,7 @@
         "Formats and compatibility ​",
         "API reference ​"
       ],
-      "checked_at": "2026-11-12T13:48:41+00:00",
+      "checked_at": "2026-11-16T13:42:49+00:00",
       "status": "ok"
     },
     {
@@ -270,7 +270,7 @@
         "Lucas-Kanade Optical Flow in OpenCV",
         "Dense Optical Flow in OpenCV"
       ],
-      "checked_at": "2026-11-12T13:48:42+00:00",
+      "checked_at": "2026-11-16T13:42:50+00:00",
       "status": "ok"
     },
     {
@@ -295,7 +295,7 @@
         "Template Matching in OpenCV",
         "Template Matching with Multiple Objects"
       ],
-      "checked_at": "2026-11-12T13:48:43+00:00",
+      "checked_at": "2026-11-16T13:42:51+00:00",
       "status": "ok"
     },
     {
@@ -350,7 +350,7 @@
         "Trail ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:43+00:00",
+      "checked_at": "2026-11-16T13:42:51+00:00",
       "status": "ok"
     },
     {
@@ -372,10 +372,11 @@
       "online_description": "Functions that support you in animating CSS styles.",
       "online_headings": [
         "@remotion/animation-utils v 4.0.92",
-        "Functions ​",
+        "Installation ​",
+        "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:43+00:00",
+      "checked_at": "2026-11-16T13:42:51+00:00",
       "status": "ok"
     },
     {
@@ -404,7 +405,7 @@
         "Animation helpers ​",
         "Full projects ​"
       ],
-      "checked_at": "2026-11-12T13:48:43+00:00",
+      "checked_at": "2026-11-16T13:42:51+00:00",
       "status": "ok"
     },
     {
@@ -433,7 +434,7 @@
         "Next steps ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:51+00:00",
       "status": "ok"
     },
     {
@@ -459,7 +460,7 @@
         "Results",
         "References"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -478,7 +479,7 @@
       "mode": "reference",
       "implementation": "research_only",
       "online_title": "Features in the Editor Starter | Remotion",
-      "online_description": "On this page, we list the features that are available in the Editor Starter.",
+      "online_description": "This page lists the features that are available in the Editor Starter.",
       "online_headings": [
         "Features in the Editor Starter",
         "Feature flags ​",
@@ -489,7 +490,7 @@
         "Playback ​",
         "Canvas ​"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -510,7 +511,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -534,7 +535,7 @@
         "Creating custom effects ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -553,9 +554,10 @@
       "online_headings": [
         "@remotion/fonts",
         "Installation ​",
-        "APIs ​"
+        "APIs ​",
+        "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -581,7 +583,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:44+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -602,7 +604,7 @@
         "Components ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:45+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -620,10 +622,10 @@
       "online_description": "A package providing utility functions for getting information about video and audio, and for visualizing audio.",
       "online_headings": [
         "@remotion/media-utils",
-        "Functions ​",
+        "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:45+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -645,7 +647,7 @@
         "Components ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:45+00:00",
+      "checked_at": "2026-11-16T13:42:52+00:00",
       "status": "ok"
     },
     {
@@ -667,7 +669,7 @@
         "Available functions ​",
         "What's the difference between renderMedia() and renderFrames() ? ​"
       ],
-      "checked_at": "2026-11-12T13:48:45+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -686,10 +688,10 @@
       "online_description": "Create a TikTok-like multiline text box SVG path with rounded corners.",
       "online_headings": [
         "@remotion/rounded-text-box v 4.0.360",
-        "Functions ​",
+        "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:45+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -706,7 +708,7 @@
       "online_title": "TransitionSeries component (@remotion/transitions) | Remotion",
       "online_description": "The ` component behaves the same as the component, but allows for and components to be rendered between ` components.",
       "online_headings": [
-        "TransitionSeries v 4.0.59",
+        "TransitionSeries v 4.0.53",
         "API ​",
         "Enter and exit animations ​",
         "Duration of a TransitionSeries ​",
@@ -715,7 +717,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:45+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -740,7 +742,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:46+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -767,7 +769,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:46+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -788,7 +790,7 @@
         "Available timings ​",
         "Getting the duration of a timing ​"
       ],
-      "checked_at": "2026-11-12T13:48:46+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -808,7 +810,7 @@
         "Presentations",
         "Table of contents ​"
       ],
-      "checked_at": "2026-11-12T13:48:46+00:00",
+      "checked_at": "2026-11-16T13:42:53+00:00",
       "status": "ok"
     },
     {
@@ -833,7 +835,7 @@
         "Requirements ​",
         "License ​"
       ],
-      "checked_at": "2026-11-12T13:48:46+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -856,7 +858,7 @@
         "API ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:46+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -882,7 +884,7 @@
         "Readers ​",
         "Writers ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -906,7 +908,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -929,7 +931,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -956,7 +958,7 @@
         "References ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -981,7 +983,7 @@
         "References ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:54+00:00",
       "status": "ok"
     },
     {
@@ -1005,7 +1007,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1030,7 +1032,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:47+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1054,7 +1056,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:48+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1078,7 +1080,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:48+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1102,7 +1104,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:48+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1127,7 +1129,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:48+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1151,7 +1153,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-12T13:48:49+00:00",
+      "checked_at": "2026-11-16T13:42:55+00:00",
       "status": "ok"
     },
     {
@@ -1167,11 +1169,17 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "zoomBlur() | Remotion",
+      "online_description": "A presentation where the outgoing scene zooms out and rotates while the incoming scene zooms in from the opposite angle, blended with a radial zoom blur.",
+      "online_headings": [
+        "zoomBlur() v 4.0.456",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-16T13:42:55+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-presentations-dreamy-zoom",
@@ -1186,11 +1194,18 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "dreamyZoom() | Remotion",
+      "online_description": "A presentation that zooms and rotates through a white flash between scenes.",
+      "online_headings": [
+        "dreamyZoom() v 4.0.466",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "Credits ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-16T13:42:55+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-presentations-film-burn",
@@ -1205,11 +1220,18 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "filmBurn() | Remotion",
+      "online_description": "A presentation that combines a procedural film-burn glow overlay with a radial blur blend.",
+      "online_headings": [
+        "filmBurn() v 4.0.467",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "Credits ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-16T13:42:56+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-presentations-linear-blur",
@@ -1220,6 +1242,88 @@
         "presentations",
         "linear",
         "blur"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": "linearBlur() | Remotion",
+      "online_description": "A presentation that applies a directional multi-sample blur while blending between scenes.",
+      "online_headings": [
+        "linearBlur() v 4.0.466",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "Credits ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-16T13:42:56+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "discovered-transitions-presentations-blur-slide",
+      "title": "Remotion documentation: transitions presentations blur slide",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/blur-slide",
+      "tags": [
+        "transitions",
+        "presentations",
+        "blur",
+        "slide"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations-book-flip",
+      "title": "Remotion documentation: transitions presentations book flip",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/book-flip",
+      "tags": [
+        "transitions",
+        "presentations",
+        "book",
+        "flip"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations-crosswarp",
+      "title": "Remotion documentation: transitions presentations crosswarp",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/crosswarp",
+      "tags": [
+        "transitions",
+        "presentations",
+        "crosswarp"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations-cross-zoom",
+      "title": "Remotion documentation: transitions presentations cross zoom",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/cross-zoom",
+      "tags": [
+        "transitions",
+        "presentations",
+        "cross",
+        "zoom"
       ],
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
