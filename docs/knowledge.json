@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-16T13:42:56+00:00",
+  "generated_at": "2026-11-19T14:28:49+00:00",
   "policy": "Curated technical resource index only; not a neural model fine-tuning dataset. No videos, images or scraped article bodies stored.",
   "sources": [
     {
@@ -28,7 +28,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:48+00:00",
+      "checked_at": "2026-11-19T14:28:39+00:00",
       "status": "ok"
     },
     {
@@ -58,7 +58,7 @@
         "Rules ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:48+00:00",
+      "checked_at": "2026-11-19T14:28:39+00:00",
       "status": "ok"
     },
     {
@@ -89,7 +89,7 @@
         "Example: CSS transform values v 4.0.472 ​",
         "Example: Discrete string values v 4.0.509 ​"
       ],
-      "checked_at": "2026-11-16T13:42:48+00:00",
+      "checked_at": "2026-11-19T14:28:39+00:00",
       "status": "ok"
     },
     {
@@ -117,7 +117,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:48+00:00",
+      "checked_at": "2026-11-19T14:28:39+00:00",
       "status": "ok"
     },
     {
@@ -141,7 +141,7 @@
         "Captions",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:49+00:00",
+      "checked_at": "2026-11-19T14:28:40+00:00",
       "status": "ok"
     },
     {
@@ -168,7 +168,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:49+00:00",
+      "checked_at": "2026-11-19T14:28:40+00:00",
       "status": "ok"
     },
     {
@@ -194,7 +194,7 @@
         "Working with large files ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:49+00:00",
+      "checked_at": "2026-11-19T14:28:40+00:00",
       "status": "ok"
     },
     {
@@ -221,7 +221,7 @@
         "Formats and compatibility ​",
         "API reference ​"
       ],
-      "checked_at": "2026-11-16T13:42:49+00:00",
+      "checked_at": "2026-11-19T14:28:40+00:00",
       "status": "ok"
     },
     {
@@ -270,7 +270,7 @@
         "Lucas-Kanade Optical Flow in OpenCV",
         "Dense Optical Flow in OpenCV"
       ],
-      "checked_at": "2026-11-16T13:42:50+00:00",
+      "checked_at": "2026-11-19T14:28:42+00:00",
       "status": "ok"
     },
     {
@@ -295,7 +295,7 @@
         "Template Matching in OpenCV",
         "Template Matching with Multiple Objects"
       ],
-      "checked_at": "2026-11-16T13:42:51+00:00",
+      "checked_at": "2026-11-19T14:28:42+00:00",
       "status": "ok"
     },
     {
@@ -342,15 +342,18 @@
       "mode": "reference",
       "implementation": "research_only",
       "online_title": "Motion blur | Remotion",
-      "online_description": "To realize a realistic motion blur, a frame needs to be duplicated multiple times and blended together.",
+      "online_description": "img",
       "online_headings": [
         "Motion blur",
-        "Recommended: HTML-in-canvas motion blur ​",
-        "Camera motion blur ​",
-        "Trail ​",
+        "Using an agent ​",
+        "In Studio ​",
+        "Programmatically ​",
+        "shutterAngle and samples ​",
+        "Browser support ​",
+        "CameraMotionBlur and Trail ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:51+00:00",
+      "checked_at": "2026-11-19T14:28:43+00:00",
       "status": "ok"
     },
     {
@@ -376,7 +379,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:51+00:00",
+      "checked_at": "2026-11-19T14:28:43+00:00",
       "status": "ok"
     },
     {
@@ -405,7 +408,7 @@
         "Animation helpers ​",
         "Full projects ​"
       ],
-      "checked_at": "2026-11-16T13:42:51+00:00",
+      "checked_at": "2026-11-19T14:28:43+00:00",
       "status": "ok"
     },
     {
@@ -434,7 +437,7 @@
         "Next steps ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:51+00:00",
+      "checked_at": "2026-11-19T14:28:43+00:00",
       "status": "ok"
     },
     {
@@ -460,7 +463,7 @@
         "Results",
         "References"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:43+00:00",
       "status": "ok"
     },
     {
@@ -490,7 +493,7 @@
         "Playback ​",
         "Canvas ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -511,7 +514,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -535,7 +538,7 @@
         "Creating custom effects ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -557,7 +560,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -583,7 +586,7 @@
         "License ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -604,7 +607,7 @@
         "Components ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -625,7 +628,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:44+00:00",
       "status": "ok"
     },
     {
@@ -647,7 +650,7 @@
         "Components ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:52+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -669,7 +672,7 @@
         "Available functions ​",
         "What's the difference between renderMedia() and renderFrames() ? ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -691,7 +694,7 @@
         "APIs ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -717,7 +720,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -742,7 +745,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -769,7 +772,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -790,7 +793,7 @@
         "Available timings ​",
         "Getting the duration of a timing ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:45+00:00",
       "status": "ok"
     },
     {
@@ -810,7 +813,7 @@
         "Presentations",
         "Table of contents ​"
       ],
-      "checked_at": "2026-11-16T13:42:53+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -835,7 +838,7 @@
         "Requirements ​",
         "License ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -858,7 +861,7 @@
         "API ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -884,7 +887,7 @@
         "Readers ​",
         "Writers ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -908,7 +911,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -931,7 +934,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -958,7 +961,7 @@
         "References ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:46+00:00",
       "status": "ok"
     },
     {
@@ -983,7 +986,7 @@
         "References ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:54+00:00",
+      "checked_at": "2026-11-19T14:28:47+00:00",
       "status": "ok"
     },
     {
@@ -1007,7 +1010,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:47+00:00",
       "status": "ok"
     },
     {
@@ -1032,7 +1035,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:47+00:00",
       "status": "ok"
     },
     {
@@ -1056,7 +1059,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:47+00:00",
       "status": "ok"
     },
     {
@@ -1080,7 +1083,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:47+00:00",
       "status": "ok"
     },
     {
@@ -1104,7 +1107,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:47+00:00",
       "status": "ok"
     },
     {
@@ -1129,7 +1132,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:48+00:00",
       "status": "ok"
     },
     {
@@ -1153,7 +1156,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:48+00:00",
       "status": "ok"
     },
     {
@@ -1178,7 +1181,7 @@
         "Compatibility ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:48+00:00",
       "status": "ok"
     },
     {
@@ -1204,7 +1207,7 @@
         "Credits ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:55+00:00",
+      "checked_at": "2026-11-19T14:28:48+00:00",
       "status": "ok"
     },
     {
@@ -1230,7 +1233,7 @@
         "Credits ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:56+00:00",
+      "checked_at": "2026-11-19T14:28:48+00:00",
       "status": "ok"
     },
     {
@@ -1256,7 +1259,7 @@
         "Credits ​",
         "See also ​"
       ],
-      "checked_at": "2026-11-16T13:42:56+00:00",
+      "checked_at": "2026-11-19T14:28:48+00:00",
       "status": "ok"
     },
     {
@@ -1272,11 +1275,17 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "blurSlide() | Remotion",
+      "online_description": "A presentation that whips both scenes in one direction with a heavy motion blur, like a fast camera pan.",
+      "online_headings": [
+        "blurSlide() v 4.0.523",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-19T14:28:49+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-presentations-book-flip",
@@ -1291,11 +1300,18 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "bookFlip() | Remotion",
+      "online_description": "A presentation that bends the outgoing and incoming scenes into a shaded page-turning book flip.",
+      "online_headings": [
+        "bookFlip() v 4.0.466",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "Credits ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-19T14:28:49+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-presentations-crosswarp",
@@ -1309,11 +1325,18 @@
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
       "implementation": "research_only",
-      "online_title": null,
-      "online_description": null,
-      "online_headings": [],
-      "checked_at": null,
-      "status": "not_checked"
+      "online_title": "crosswarp() | Remotion",
+      "online_description": "A presentation that warps the outgoing scene and incoming scene against each other across the x-axis.",
+      "online_headings": [
+        "crosswarp() v 4.0.466",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "Credits ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-19T14:28:49+00:00",
+      "status": "ok"
     },
     {
       "id": "discovered-transitions-presentations-cross-zoom",
@@ -1324,6 +1347,85 @@
         "presentations",
         "cross",
         "zoom"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": "crossZoom() | Remotion",
+      "online_description": "A presentation where both scenes zoom across a moving center with weighted blur samples.",
+      "online_headings": [
+        "crossZoom() v 4.0.467",
+        "Example ​",
+        "API ​",
+        "Compatibility ​",
+        "Credits ​",
+        "See also ​"
+      ],
+      "checked_at": "2026-11-19T14:28:49+00:00",
+      "status": "ok"
+    },
+    {
+      "id": "discovered-transitions-presentations-cube",
+      "title": "Remotion documentation: transitions presentations cube",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/cube",
+      "tags": [
+        "transitions",
+        "presentations",
+        "cube"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations-dissolve",
+      "title": "Remotion documentation: transitions presentations dissolve",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/dissolve",
+      "tags": [
+        "transitions",
+        "presentations",
+        "dissolve"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations-none",
+      "title": "Remotion documentation: transitions presentations none",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/none",
+      "tags": [
+        "transitions",
+        "presentations",
+        "none"
+      ],
+      "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
+      "mode": "reference",
+      "implementation": "research_only",
+      "online_title": null,
+      "online_description": null,
+      "online_headings": [],
+      "checked_at": null,
+      "status": "not_checked"
+    },
+    {
+      "id": "discovered-transitions-presentations-ripple",
+      "title": "Remotion documentation: transitions presentations ripple",
+      "url": "https://www.remotion.dev/docs/transitions/presentations/ripple",
+      "tags": [
+        "transitions",
+        "presentations",
+        "ripple"
       ],
       "note": "Official technique documentation discovered online; not an installed or tested editing effect.",
       "mode": "reference",
